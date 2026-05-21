@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leilão - Leilap Commodities</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="main-content" id="leilao-container">
+    <div class="loading">Carregando leilão</div>
+  </main>
+  <div id="footer-placeholder"></div>
+
+  <div class="modal" id="modal-lance">
+    <div class="modal-content">
+      <button class="btn-fechar" onclick="fecharModal()">&times;</button>
+      <h2>Dar Lance</h2>
+      <div class="form-group">
+        <label>Valor do lance (R$)</label>
+        <input type="number" id="lance-valor" class="form-control" step="0.01" min="0">
+      </div>
+      <button class="btn btn-primary" onclick="confirmarLance()" style="width:100%;">Confirmar Lance</button>
+      <div id="lance-status" style="margin-top:0.5rem;"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/components.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const leilaoId = params.get('id');
+    let leilao = null;
+
+    async function init() {
+      if (!leilaoId) { document.getElementById('leilao-container').innerHTML = '<p>Leilão não encontrado</p>'; return; }
+      leilao = await API.getLeilao(leilaoId);
+      renderizar();
+    }
+
+    function renderizar() {
+      const l = leilao;
+      const ativo = l.status === 'ativo';
+      const fim = new Date(l.data_fim);
+      const encerrado = new Date() > fim;
+      const tag = encerrado ? 'Encerrado' : (ativo ? 'Ativo' : l.status);
+
+      document.getElementById('leilao-container').innerHTML = `
+        <div class="leilao-header">
+          <span style="font-size:2rem;">${l.icone || '📦'}</span>
+          <h1>${l.titulo}</h1>
+          <p>${l.descricao || ''}</p>
+          <div style="margin-top:1rem;">
+            <span style="font-size:0.9rem;opacity:0.8;">${l.comoditie_nome} · ${l.quantidade} ${l.unidade}</span>
+          </div>
+          <div class="preco-atual">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
+          <div class="timer" id="timer">${encerrado ? '🔴 Encerrado' : '⏳ Tempo restante: calculando...'}</div>
+          ${ativo && !encerrado ? `<button class="btn btn-warning btn-lg" onclick="abrirModal()" style="margin-top:1rem;">💰 Dar Lance</button>` : ''}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
+          <div class="card"><div class="card-body">
+            <div style="color:#888;">Preço Inicial</div>
+            <div style="font-size:1.3rem;font-weight:bold;">R$ ${parseFloat(l.preco_inicial).toFixed(2)}</div>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div style="color:#888;">Valor Mínimo por Lance</div>
+            <div style="font-size:1.3rem;font-weight:bold;">R$ ${l.valor_minimo_lance ? parseFloat(l.valor_minimo_lance).toFixed(2) : 'Livre'}</div>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div style="color:#888;">Início</div>
+            <div style="font-size:1.1rem;font-weight:bold;">${new Date(l.data_inicio).toLocaleString('pt-BR')}</div>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div style="color:#888;">Término</div>
+            <div style="font-size:1.1rem;font-weight:bold;" id="data-fim">${new Date(l.data_fim).toLocaleString('pt-BR')}</div>
+          </div></div>
+        </div>
+
+        <h2 style="color:#1e3a5f;margin-bottom:1rem;">📋 Lances</h2>
+        ${l.lances && l.lances.length ? `
+        <table>
+          <thead><tr><th>#</th><th>Usuário</th><th>Valor</th><th>Data</th></tr></thead>
+          <tbody>
+            ${l.lances.map((lc, i) => `<tr>
+              <td>${i + 1}</td>
+              <td>${lc.usuario_nome}</td>
+              <td style="font-weight:bold;color:#059669;">R$ ${parseFloat(lc.valor).toFixed(2)}</td>
+              <td>${new Date(lc.timestamp).toLocaleString('pt-BR')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` : '<p style="color:#888;">Nenhum lance ainda. Seja o primeiro!</p>'}`;
+
+      if (!encerrado && ativo) iniciarTimer(fim);
+    }
+
+    function iniciarTimer(fim) {
+      function atualizar() {
+        const diff = fim - new Date();
+        if (diff <= 0) { document.getElementById('timer').textContent = '🔴 Encerrado'; return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('timer').textContent = `⏳ ${d}d ${h}h ${m}m ${s}s`;
+      }
+      atualizar();
+      setInterval(atualizar, 1000);
+    }
+
+    function abrirModal() {
+      if (!API.token) { alert('Faça login para dar lances'); window.location.href = '/admin/login.html'; return; }
+      document.getElementById('lance-valor').value = parseFloat(leilao.preco_atual) + (parseFloat(leilao.valor_minimo_lance) || 0.01);
+      document.getElementById('modal-lance').classList.add('active');
+    }
+
+    function fecharModal() { document.getElementById('modal-lance').classList.remove('active'); }
+
+    async function confirmarLance() {
+      const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
+      const valor = parseFloat(document.getElementById('lance-valor').value);
+      if (!valor || valor <= 0) { document.getElementById('lance-status').innerHTML = '<div class="alert alert-error">Valor inválido</div>'; return; }
+      const r = await API.criarLance(leilaoId, user.id, valor);
+      if (r.success) {
+        document.getElementById('lance-status').innerHTML = '<div class="alert alert-success">Lance registrado com sucesso!</div>';
+        setTimeout(() => { fecharModal(); init(); }, 1000);
+      } else {
+        document.getElementById('lance-status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro ao registrar lance') + '</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

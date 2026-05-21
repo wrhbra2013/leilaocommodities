@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leilap Commodities - Leilão de Commodities Agrícolas</title>
+  <link rel="icon" type="image/png" href="/static/icon/favicon.ico">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
+    <section class="hero">
+      <span class="hero-badge">🔴 LEILÕES AO VIVO</span>
+      <h1>Commodities Agrícolas<br>em Leilão Online</h1>
+      <p>Participe de leilões de soja, milho, café, boi gordo e mais. Preços em tempo real com cotações do mercado.</p>
+      <a href="/paginas/leiloes.html" class="btn btn-primary btn-lg">Ver Leilões</a>
+      <a href="/admin/register.html" class="btn btn-outline btn-lg" style="margin-left: 0.5rem;">Criar Conta</a>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="text-align:center;color:#1e3a5f;margin-bottom:1.5rem;">📈 Cotações em Tempo Real</h2>
+      <div class="commodities-grid" id="cotacoes-grid">
+        <div class="loading">Carregando cotações</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="text-align:center;color:#1e3a5f;margin-bottom:1.5rem;">🔨 Leilões em Destaque</h2>
+      <div class="card-grid" id="leiloes-destaque">
+        <div class="loading">Carregando leilões</div>
+      </div>
+    </section>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/components.js"></script>
+  <script>
+    async function carregarCotacoes() {
+      const grid = document.getElementById('cotacoes-grid');
+      try {
+        const cotacoes = await API.getCotacoes();
+        const comods = await API.getComodities();
+        grid.innerHTML = comods.map(c => {
+          const cot = cotacoes[c.slug] || {};
+          const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
+          return `<div class="commodity-card" onclick="location.href='/paginas/comodities.html?slug=${c.slug}'">
+            <div class="icon">${c.icone}</div>
+            <div class="nome">${c.nome}</div>
+            <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '--'}</div>
+            <div class="variacao ${varClass}">${cot.variacao || '--'}</div>
+            <div style="font-size:0.8rem;color:#888;">${c.unidade}</div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<p style="text-align:center;color:#888;">Cotações indisponíveis no momento</p>';
+      }
+    }
+
+    async function carregarLeiloes() {
+      const grid = document.getElementById('leiloes-destaque');
+      try {
+        const r = await API.listLeiloes({ status: 'ativo', limit: 6 });
+        if (!r.data || !r.data.length) {
+          grid.innerHTML = '<p style="text-align:center;color:#888;grid-column:1/-1;">Nenhum leilão ativo no momento</p>';
+          return;
+        }
+        grid.innerHTML = r.data.map(l => {
+          const tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
+          return `<div class="card" onclick="location.href='/paginas/leilao.html?id=${l.id}'">
+            <div class="card-body">
+              <div class="card-icon">${l.icone || '📦'}</div>
+              <h3>${l.titulo}</h3>
+              <div class="tag ${tagCls}">${l.status === 'ativo' ? 'Ativo' : 'Encerrado'}</div>
+              <div class="preco">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
+              <div class="meta">${l.comoditie_nome} · ${l.quantidade} ${l.unidade}</div>
+              <div class="meta">${l.total_lances || 0} lance(s)</div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<p style="text-align:center;color:#888;">Erro ao carregar leilões</p>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarCotacoes();
+      carregarLeiloes();
+    });
+  </script>
+</body>
+</html>

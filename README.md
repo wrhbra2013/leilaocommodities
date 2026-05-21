@@ -1,2 +1,2 @@
-# leilaocommodities
-Aplicativo Web para leilao de commodities agricolas.
+# leilao.commodities
+Aplicação Web de negociações agricolas por leilão.

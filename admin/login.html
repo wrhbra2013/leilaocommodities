@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar - Leilão Commodities</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .auth-container { max-width: 400px; margin: 4rem auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .auth-container h1 { text-align: center; color: #1e3a5f; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h1>📊 Entrar</h1>
+    <div id="login-status"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" class="form-control" placeholder="seu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" class="form-control" placeholder="Sua senha">
+    </div>
+    <button class="btn btn-primary" onclick="entrar()" style="width:100%;">Entrar</button>
+    <p style="text-align:center;margin-top:1rem;color:#888;">
+      Não tem conta? <a href="/admin/register.html">Cadastre-se</a>
+    </p>
+    <p style="text-align:center;margin-top:0.5rem;">
+      <a href="/">← Voltar ao início</a>
+    </p>
+  </div>
+  <script src="/static/js/api-client.js"></script>
+  <script>
+    async function entrar() {
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      if (!email || !senha) { document.getElementById('login-status').innerHTML = '<div class="alert alert-error">Preencha todos os campos</div>'; return; }
+      const r = await API.login(email, senha);
+      if (r.success) {
+        API.setToken(r.token);
+        localStorage.setItem('lcm_user', JSON.stringify(r.user));
+        const redirect = new URLSearchParams(window.location.search).get('redirect') || '/admin/index.html';
+        window.location.href = redirect;
+      } else {
+        document.getElementById('login-status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro ao entrar') + '</div>';
+      }
+    }
+    document.getElementById('login-senha').addEventListener('keypress', e => { if (e.key === 'Enter') entrar(); });
+  </script>
+</body>
+</html>

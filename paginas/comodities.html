@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotações - Leilão Commodities</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .cotacao-card { background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    .cotacao-card .header { display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem; }
+    .cotacao-card .icon { font-size:2rem; }
+    .cotacao-card .nome { font-weight:600;font-size:1.1rem; }
+    .cotacao-card .preco { font-size:1.8rem;font-weight:bold;color:#059669; }
+    .cotacao-card .detalhes { display:flex;gap:1rem;margin-top:0.5rem;font-size:0.9rem;color:#666; }
+    .cotacao-card .grafico { margin-top:1rem;height:60px;background:linear-gradient(90deg,#d1fae5,#a7f3d0,#6ee7b7);border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
+    <h1 style="color:#1e3a5f;margin-bottom:0.5rem;">📈 Cotações do Mercado</h1>
+    <p style="color:#666;margin-bottom:2rem;">Preços atualizados em tempo real das principais commodities</p>
+    <div id="status-cotacao" class="alert alert-info" style="display:none;"></div>
+    <div id="cotacoes-list"></div>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/components.js"></script>
+  <script>
+    async function init() {
+      const el = document.getElementById('cotacoes-list');
+      el.innerHTML = '<div class="loading">Carregando cotações</div>';
+      try {
+        const [cotacoes, comods] = await Promise.all([API.getCotacoes(), API.getComodities()]);
+        el.innerHTML = comods.map(c => {
+          const cot = cotacoes[c.slug] || {};
+          const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
+          return `<div class="cotacao-card">
+            <div class="header">
+              <div><span class="icon">${c.icone}</span> <span class="nome">${c.nome}</span></div>
+              <span class="tag">${c.unidade}</span>
+            </div>
+            <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '<span style="color:#888;">Indisponível</span>'}</div>
+            <div class="detalhes">
+              <span>Variação: <strong class="${varClass}">${cot.variacao || '--'}</strong></span>
+              <span>Data: ${cot.data || '--'}</span>
+            </div>
+            <div class="grafico"></div>
+            <div style="margin-top:1rem;">
+              <a href="/paginas/leiloes.html?comoditie=${c.slug}" class="btn btn-outline" style="padding:0.5rem 1rem;font-size:0.85rem;">Ver Leilões</a>
+            </div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        el.innerHTML = '<div class="alert alert-error">Erro ao carregar cotações</div>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

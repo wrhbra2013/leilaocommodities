@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leilões - Leilap Commodities</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
+    <h1 style="color:#1e3a5f;margin-bottom:0.5rem;">🔨 Leilões</h1>
+    <p style="color:#666;margin-bottom:1.5rem;">Participe dos leilões e faça seus lances</p>
+
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <select id="filtro-comoditie" class="form-control" style="width:auto;min-width:180px;">
+        <option value="">Todas as commodities</option>
+      </select>
+      <select id="filtro-status" class="form-control" style="width:auto;min-width:150px;">
+        <option value="">Todos os status</option>
+        <option value="ativo">Ativos</option>
+        <option value="encerrado">Encerrados</option>
+      </select>
+      <button class="btn btn-primary" onclick="filtrar()">Filtrar</button>
+    </div>
+
+    <div class="card-grid" id="lista-leiloes">
+      <div class="loading">Carregando leilões</div>
+    </div>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/components.js"></script>
+  <script>
+    let comods = [];
+
+    async function init() {
+      comods = await API.getComodities();
+      const sel = document.getElementById('filtro-comoditie');
+      sel.innerHTML = '<option value="">Todas as commodities</option>' +
+        comods.map(c => '<option value="' + c.id + '">' + c.icone + ' ' + c.nome + '</option>').join('');
+      filtrar();
+    }
+
+    async function filtrar() {
+      const grid = document.getElementById('lista-leiloes');
+      grid.innerHTML = '<div class="loading">Carregando</div>';
+      const r = await API.listLeiloes({
+        comoditie_id: document.getElementById('filtro-comoditie').value || undefined,
+        status: document.getElementById('filtro-status').value || undefined,
+      });
+      if (!r.data || !r.data.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888;padding:3rem;">Nenhum leilão encontrado</p>';
+        return;
+      }
+      grid.innerHTML = r.data.map(l => {
+        const tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
+        return `<div class="card" onclick="location.href='/paginas/leilao.html?id=${l.id}'">
+          <div class="card-body">
+            <div class="card-icon">${l.icone || '📦'}</div>
+            <h3>${l.titulo}</h3>
+            <div class="tag ${tagCls}">${l.status === 'ativo' ? 'Ativo' : 'Encerrado'}</div>
+            <div class="preco">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
+            <div class="meta">${l.comoditie_nome} · ${l.quantidade} ${l.unidade}</div>
+            <div class="meta">${l.total_lances || 0} lance(s)</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

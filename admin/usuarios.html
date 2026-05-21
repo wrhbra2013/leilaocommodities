@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuários - Leilão Commodities</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
+    <h1 style="color:#1e3a5f;margin-bottom:1.5rem;">👥 Usuários Cadastrados</h1>
+    <div id="usuarios-list"><div class="loading">Carregando</div></div>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/components.js"></script>
+  <script>
+    async function init() {
+      if (!API.token) { window.location.href = '/admin/login.html'; return; }
+      const r = await API.adminUsuarios();
+      const usuarios = r.data || [];
+      document.getElementById('usuarios-list').innerHTML = usuarios.length
+        ? `<table>
+          <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Nível</th><th>Cadastro</th></tr></thead>
+          <tbody>${usuarios.map(u => `<tr>
+            <td>${u.nome}</td>
+            <td>${u.email}</td>
+            <td>${u.telefone || '-'}</td>
+            <td><span class="tag">${u.nivel}</span></td>
+            <td style="font-size:0.85rem;color:#888;">${new Date(u.created_at).toLocaleString('pt-BR')}</td>
+          </tr>`).join('')}</tbody>
+        </table>` : '<p style="color:#888;">Nenhum usuário cadastrado</p>';
+    }
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
