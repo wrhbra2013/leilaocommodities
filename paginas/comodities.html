@@ -24,6 +24,7 @@
   </main>
   <div id="footer-placeholder"></div>
   <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
   <script>
     async function init() {
@@ -36,8 +37,8 @@
           const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
           return `<div class="cotacao-card">
             <div class="header">
-              <div><span class="icon">${c.icone}</span> <span class="nome">${c.nome}</span></div>
-              <span class="tag">${c.unidade}</span>
+              <div><span class="icon">${html(c.icone)}</span> <span class="nome">${html(c.nome)}</span></div>
+              <span class="tag">${html(c.unidade)}</span>
             </div>
             <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '<span style="color:#888;">Indisponível</span>'}</div>
             <div class="detalhes">

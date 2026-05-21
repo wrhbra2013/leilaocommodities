@@ -13,20 +13,22 @@
   </main>
   <div id="footer-placeholder"></div>
   <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
   <script>
     async function init() {
-      if (!API.token) { window.location.href = '/admin/login.html'; return; }
+      const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
+      if (!API.token || user.nivel !== 'admin') { window.location.href = '/admin/login.html'; return; }
       const r = await API.adminUsuarios();
       const usuarios = r.data || [];
       document.getElementById('usuarios-list').innerHTML = usuarios.length
         ? `<table>
           <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Nível</th><th>Cadastro</th></tr></thead>
-          <tbody>${usuarios.map(u => `<tr>
-            <td>${u.nome}</td>
-            <td>${u.email}</td>
-            <td>${u.telefone || '-'}</td>
-            <td><span class="tag">${u.nivel}</span></td>
+          <tbody>${      usuarios.map(u => `<tr>
+            <td>${html(u.nome)}</td>
+            <td>${html(u.email)}</td>
+            <td>${html(u.telefone || '-')}</td>
+            <td><span class="tag">${html(u.nivel)}</span></td>
             <td style="font-size:0.85rem;color:#888;">${new Date(u.created_at).toLocaleString('pt-BR')}</td>
           </tr>`).join('')}</tbody>
         </table>` : '<p style="color:#888;">Nenhum usuário cadastrado</p>';

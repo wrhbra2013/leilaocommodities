@@ -137,9 +137,11 @@ install_project() {
     echo ""
     echo "--- Configurando .env ---"
 
+    JWT_SECRET=$(node -e "console.log(require('crypto').randomUUID())")
     sudo tee "$API_DIR/.env" > /dev/null <<EOF
 EXTERNAL_API=$EXTERNAL_API
 API_TOKEN=$API_TOKEN
+JWT_SECRET=$JWT_SECRET
 PORT=$PORT
 EOF
 

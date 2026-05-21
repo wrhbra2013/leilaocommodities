@@ -12,14 +12,24 @@ const API = {
     return h;
   },
 
+  async handleResponse(r) {
+    if (r.status === 401) {
+      this.clearToken();
+      const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = '/admin/login.html?redirect=' + redirect;
+      throw new Error('Sessão expirada');
+    }
+    return r.json();
+  },
+
   async get(path) {
     const r = await fetch(this.baseUrl + path, { headers: this.headers() });
-    return r.json();
+    return this.handleResponse(r);
   },
 
   async post(path, body) {
     const r = await fetch(this.baseUrl + path, { method: 'POST', headers: this.headers(), body: JSON.stringify(body) });
-    return r.json();
+    return this.handleResponse(r);
   },
 
   // Auth
@@ -35,7 +45,7 @@ const API = {
   async getLeilao(id) { return this.get('/api/leiloes/' + id); },
 
   // Lances
-  async criarLance(leilao_id, usuario_id, valor) { return this.post('/api/lances/criar', { leilao_id, usuario_id, valor }); },
+  async criarLance(leilao_id, valor) { return this.post('/api/lances/criar', { leilao_id, valor }); },
   async getLances(leilao_id) { return this.get('/api/lances/' + leilao_id); },
 
   // Admin

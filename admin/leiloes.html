@@ -56,14 +56,16 @@
   </div>
 
   <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
   <script>
     let comods = [], editId = null;
 
     async function init() {
-      if (!API.token) { window.location.href = '/admin/login.html'; return; }
+      const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
+      if (!API.token || user.nivel !== 'admin') { window.location.href = '/admin/login.html'; return; }
       comods = await API.getComodities();
-      document.getElementById('l-comoditie').innerHTML = comods.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
+      document.getElementById('l-comoditie').innerHTML = comods.map(c => `<option value="${html(c.id)}">${html(c.icone)} ${html(c.nome)}</option>`).join('');
       carregar();
     }
 
@@ -74,15 +76,15 @@
         ? `<table>
           <thead><tr><th>Título</th><th>Commoditie</th><th>Preço</th><th>Lances</th><th>Status</th><th>Término</th><th>Ações</th></tr></thead>
           <tbody>${ls.map(l => `<tr>
-            <td><a href="/paginas/leilao.html?id=${l.id}">${l.titulo}</a></td>
-            <td>${l.comoditie_nome}</td>
+            <td><a href="/paginas/leilao.html?id=${html(l.id)}">${html(l.titulo)}</a></td>
+            <td>${html(l.comoditie_nome)}</td>
             <td style="font-weight:bold;color:#059669;">R$ ${parseFloat(l.preco_atual).toFixed(2)}</td>
             <td>${l.total_lances || 0}</td>
-            <td><span class="tag ${l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado'}">${l.status}</span></td>
+            <td><span class="tag ${l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado'}">${html(l.status)}</span></td>
             <td style="font-size:0.85rem;">${new Date(l.data_fim).toLocaleString('pt-BR')}</td>
             <td>
-              <button class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="editar('${l.id}')">Editar</button>
-              ${l.status === 'ativo' ? `<button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="encerrar('${l.id}')">Encerrar</button>` : ''}
+              <button class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="editar('${html(l.id)}')">Editar</button>
+              ${l.status === 'ativo' ? `<button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="encerrar('${html(l.id)}')">Encerrar</button>` : ''}
             </td>
           </tr>`).join('')}</tbody>
         </table>` : '<p style="color:#888;">Nenhum leilão ainda</p>';

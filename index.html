@@ -34,6 +34,7 @@
   </main>
   <div id="footer-placeholder"></div>
   <script src="/static/js/api-client.js"></script>
+  <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
   <script>
     async function carregarCotacoes() {
@@ -44,9 +45,9 @@
         grid.innerHTML = comods.map(c => {
           const cot = cotacoes[c.slug] || {};
           const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
-          return `<div class="commodity-card" onclick="location.href='/paginas/comodities.html?slug=${c.slug}'">
-            <div class="icon">${c.icone}</div>
-            <div class="nome">${c.nome}</div>
+          return `<div class="commodity-card" onclick="location.href='/paginas/comodities.html?slug=${html(c.slug)}'">
+            <div class="icon">${html(c.icone)}</div>
+            <div class="nome">${html(c.nome)}</div>
             <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '--'}</div>
             <div class="variacao ${varClass}">${cot.variacao || '--'}</div>
             <div style="font-size:0.8rem;color:#888;">${c.unidade}</div>
@@ -67,13 +68,13 @@
         }
         grid.innerHTML = r.data.map(l => {
           const tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
-          return `<div class="card" onclick="location.href='/paginas/leilao.html?id=${l.id}'">
+          return `<div class="card" onclick="location.href='/paginas/leilao.html?id=${html(l.id)}'">
             <div class="card-body">
-              <div class="card-icon">${l.icone || '📦'}</div>
-              <h3>${l.titulo}</h3>
+              <div class="card-icon">${html(l.icone || '📦')}</div>
+              <h3>${html(l.titulo)}</h3>
               <div class="tag ${tagCls}">${l.status === 'ativo' ? 'Ativo' : 'Encerrado'}</div>
               <div class="preco">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
-              <div class="meta">${l.comoditie_nome} · ${l.quantidade} ${l.unidade}</div>
+              <div class="meta">${html(l.comoditie_nome)} · ${html(l.quantidade)} ${html(l.unidade)}</div>
               <div class="meta">${l.total_lances || 0} lance(s)</div>
             </div>
           </div>`;
