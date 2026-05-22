@@ -61,7 +61,7 @@
           ${ativo && !encerrado ? `<button class="btn btn-warning btn-lg" onclick="abrirModal()" class="mt-md">💰 Dar Lance</button>` : ''}
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
+        <div class="leilao-info-grid">
           <div class="card"><div class="card-body">
             <div class="card-label">Preço Inicial</div>
             <div class="text-lg">R$ ${parseFloat(l.preco_inicial).toFixed(2)}</div>

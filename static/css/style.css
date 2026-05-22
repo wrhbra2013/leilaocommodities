@@ -174,7 +174,7 @@ a:hover { text-decoration: underline; }
   .main-nav {
     display: none;
     position: fixed;
-    top: 60px;
+    top: 56px;
     left: 0;
     right: 0;
     background: var(--color-primary);
@@ -489,6 +489,13 @@ select.form-control { appearance: auto; cursor: pointer; }
 .leilao-header .preco-atual { font-size: 2rem; font-weight: 700; color: var(--color-accent-light); }
 .leilao-header .timer { font-size: 1.2rem; margin-top: var(--space-sm); font-weight: 500; }
 
+.leilao-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: var(--space-xl);
+}
+
 /* Tables */
 table {
   width: 100%;
@@ -516,11 +523,6 @@ th {
 
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--color-surface-hover); }
-
-@media (max-width: 640px) {
-  table { font-size: 0.85rem; }
-  th, td { padding: 0.6rem 0.8rem; }
-}
 
 /* Footer */
 .footer {
@@ -914,3 +916,123 @@ tr:hover td { background: var(--color-surface-hover); }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
+
+/* ===== Responsive ===== */
+
+/* Small phones */
+@media (max-width: 480px) {
+  :root {
+    --space-xl: 1.25rem;
+    --space-2xl: 2rem;
+  }
+
+  .main-content { padding: var(--space-md) var(--space-sm); }
+
+  .hero { padding: var(--space-lg) var(--space-md); border-radius: var(--radius-lg); }
+  .hero h1 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+  .hero p { font-size: 0.95rem; }
+  .hero-badge { font-size: 0.7rem; padding: 0.2rem 0.8rem; }
+  .hero .btn-lg {
+    display: block; width: 100%; margin-left: 0 !important;
+    margin-bottom: var(--space-sm);
+  }
+
+  .section-title { font-size: 1.2rem; }
+  .section-subtitle { font-size: 0.9rem; }
+
+  .commodity-card { padding: var(--space-md); }
+  .commodity-card .preco { font-size: 1rem; }
+
+  .card-grid { gap: 1rem; }
+  .card-body { padding: var(--space-md); }
+  .card .preco { font-size: 1.2rem; }
+  .card-icon { font-size: 2rem; }
+
+  .modal-content {
+    padding: var(--space-lg);
+    width: 95%;
+    max-height: 90vh;
+  }
+  .modal-content h2 { font-size: 1.1rem; }
+
+  .auth-container {
+    margin: 2rem auto;
+    padding: var(--space-lg);
+  }
+
+  .step-card { padding: var(--space-lg); }
+  .step-card .step-icon { font-size: 2rem; }
+  .step-card h3 { font-size: 1rem; }
+  .step-card p { font-size: 0.85rem; }
+
+  .feature-card { flex-direction: column; align-items: center; text-align: center; }
+  .feature-card .feature-icon { width: 40px; height: 40px; font-size: 1.4rem; }
+
+  .cta-section { padding: var(--space-xl) var(--space-md); }
+  .cta-section h2 { font-size: 1.2rem; }
+  .cta-section p { font-size: 0.9rem; }
+  .cta-section .btn { display: block; width: 100%; }
+
+  .leilao-header { padding: var(--space-lg); }
+  .leilao-header h1 { font-size: 1.2rem; }
+  .leilao-header .preco-atual { font-size: 1.5rem; }
+  .leilao-header .timer { font-size: 1rem; }
+
+  .stat-card .numero { font-size: 1.6rem; }
+  .stat-card .rotulo { font-size: 0.8rem; }
+
+  .loading { padding: 2rem; }
+
+  .skeleton-item { padding: var(--space-md); }
+}
+
+/* Phones */
+@media (max-width: 640px) {
+  table {
+    font-size: 0.8rem;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  th, td { padding: 0.5rem 0.6rem; }
+
+  .leilao-info-grid { grid-template-columns: 1fr; }
+
+  .flex-row select.form-control,
+  .flex-row .btn { width: 100%; }
+
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+  .commodities-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+
+  .card-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+  .steps-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+
+  .features-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+  .page-title { font-size: 1.2rem; }
+  .page-title-lg { font-size: 1.3rem; }
+
+  .bid-badge { font-size: 0.85rem; }
+
+  .auth-container { max-width: 100%; margin-left: var(--space-sm); margin-right: var(--space-sm); }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .leilao-info-grid { grid-template-columns: 1fr 1fr; }
+
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Tablets landscape / small laptops */
+@media (max-width: 1024px) {
+  .hero { padding: var(--space-xl) var(--space-md); }
+  .hero h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); }
+}
