@@ -1,7 +1,7 @@
 function initComponents() {
   const html = `<header class="header">
     <div class="header-container">
-      <a href="/" class="header-title">📊 Leilão Commodities</a>
+      <a href="/" class="header-title">📊 Leilap Commodities</a>
       <input type="checkbox" id="menu-toggle" class="menu-checkbox">
       <label for="menu-toggle" class="sandwich-button" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -13,7 +13,7 @@ function initComponents() {
           <li><a href="/paginas/leiloes.html" class="${isActive('leiloes')}">Leilões</a></li>
           ${API.token ? `<li><a href="/paginas/meus-lances.html" class="${isActive('meus-lances')}">Meus Lances</a></li>` : ''}
           ${API.token ? `<li><a href="/admin/index.html" class="${isActive('admin')}">Admin</a></li>` : ''}
-          ${API.token ? `<li><a href="#" onclick="logout()" style="color:#fbbf24;">Sair</a></li>`
+          ${API.token ? `<li><a href="#" onclick="logout()" class="nav-sair">Sair</a></li>`
             : `<li><a href="/admin/login.html" class="${isActive('login')}">Entrar</a></li>`}
         </ul>
       </nav>

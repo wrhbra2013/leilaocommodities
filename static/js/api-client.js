@@ -47,6 +47,7 @@ const API = {
   // Lances
   async criarLance(leilao_id, valor) { return this.post('/api/lances/criar', { leilao_id, valor }); },
   async getLances(leilao_id) { return this.get('/api/lances/' + leilao_id); },
+  async meusLances() { return this.get('/api/meus-lances'); },
 
   // Admin
   async criarLeilao(data) { return this.post('/api/admin/leiloes/criar', data); },

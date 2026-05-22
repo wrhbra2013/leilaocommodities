@@ -1,11 +1,11 @@
 import { apiRequest } from '../lib/api-client.js';
 
 export async function commoditiesRoutes(fastify) {
-  fastify.get('/api/comodities', async () => {
+  fastify.get('/api/comodities', async (req, reply) => {
     try {
       const r = await apiRequest('read', { table: 'comodities', filters: { ativo: true }, order_by: 'nome', order_dir: 'ASC' });
       return r.data || [];
-    } catch { return []; }
+    } catch (e) { req.log.error(e, 'commodities list'); return []; }
   });
 
   fastify.get('/api/comodities/:slug', async (req, reply) => {
@@ -13,6 +13,6 @@ export async function commoditiesRoutes(fastify) {
       const r = await apiRequest('read', { table: 'comodities', filters: { slug: req.params.slug } });
       if (!r.data || !r.data.length) return reply.code(404).send({ error: 'Não encontrada' });
       return r.data[0];
-    } catch { return reply.code(502).send({ error: 'Serviço indisponível' }); }
+    } catch (e) { req.log.error(e, 'commodities get'); return reply.code(502).send({ error: 'Serviço indisponível' }); }
   });
 }

@@ -8,7 +8,7 @@
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <h1 style="color:#1e3a5f;margin-bottom:1.5rem;">👥 Usuários Cadastrados</h1>
+    <h1 class="page-title-lg">👥 Usuários Cadastrados</h1>
     <div id="usuarios-list"><div class="loading">Carregando</div></div>
   </main>
   <div id="footer-placeholder"></div>
@@ -29,9 +29,9 @@
             <td>${html(u.email)}</td>
             <td>${html(u.telefone || '-')}</td>
             <td><span class="tag">${html(u.nivel)}</span></td>
-            <td style="font-size:0.85rem;color:#888;">${new Date(u.created_at).toLocaleString('pt-BR')}</td>
+            <td class="text-sm text-muted">${new Date(u.created_at).toLocaleString('pt-BR')}</td>
           </tr>`).join('')}</tbody>
-        </table>` : '<p style="color:#888;">Nenhum usuário cadastrado</p>';
+        </table>` : '<p class="text-muted">Nenhum usuário cadastrado</p>';
     }
     document.addEventListener('DOMContentLoaded', init);
   </script>

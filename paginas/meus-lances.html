@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Lances - Leilão Commodities</title>
+  <title>Meus Lances - Leilap Commodities</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <h1 style="color:#1e3a5f;margin-bottom:1.5rem;">💰 Meus Lances</h1>
+    <h1 class="page-title-lg">💰 Meus Lances</h1>
     <div id="lances-container">
       <div class="loading">Carregando seus lances</div>
     </div>
@@ -20,38 +20,32 @@
   <script>
     async function init() {
       if (!API.token) { window.location.href = '/admin/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
-      const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
-      if (!user.id) { window.location.href = '/admin/login.html'; return; }
       const el = document.getElementById('lances-container');
       try {
-        const r = await API.listLeiloes({});
-        const leiloes = r.data || [];
-        const meusLances = [];
-        for (const l of leiloes) {
-          const lances = await API.getLances(l.id);
-          const meus = (lances || []).filter(lc => lc.usuario_id === user.id);
-          if (meus.length) meusLances.push({ leilao: l, lances: meus });
-        }
-        if (!meusLances.length) {
+        const r = await API.meusLances();
+        const items = r.data || [];
+        if (!items.length) {
           el.innerHTML = '<div class="alert alert-info">Você ainda não deu lances em nenhum leilão. <a href="/paginas/leiloes.html">Ver leilões ativos</a></div>';
           return;
         }
-        el.innerHTML = meusLances.map(({ leilao, lances }) => `
-          <div class="card" style="margin-bottom:1rem;cursor:pointer;" onclick="location.href='/paginas/leilao.html?id=${html(leilao.id)}'">
-            <div class="card-body">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <h3>${html(leilao.titulo)}</h3>
-                <span class="tag ${leilao.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado'}">${html(leilao.status)}</span>
-              </div>
-              <div class="meta">${html(leilao.comoditie_nome)} · ${html(leilao.quantidade)} ${html(leilao.unidade)}</div>
-              <div style="margin-top:0.5rem;">
-                <strong>Seus lances (${lances.length}):</strong>
-                ${lances.map(lc => `<span style="display:inline-block;background:#d1fae5;padding:0.2rem 0.6rem;border-radius:6px;margin:0.2rem;font-weight:bold;color:#059669;">R$ ${parseFloat(lc.valor).toFixed(2)}</span>`).join('')}
-              </div>
-              <div style="margin-top:0.5rem;color:#888;font-size:0.85rem;">Melhor lance atual: R$ ${parseFloat(leilao.preco_atual).toFixed(2)}</div>
-            </div>
-          </div>
-        `).join('');
+        el.innerHTML = items.map(item => {
+          const l = item.leilao || {};
+          const lances = [item];
+          return '<div class="card" style="margin-bottom:1rem;" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
+            '<div class="card-body">' +
+            '<div class="flex-between">' +
+            '<h3>' + html(l.titulo || 'Leilão') + '</h3>' +
+            '<span class="tag ' + (l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado') + '">' + html(l.status || 'desconhecido') + '</span>' +
+            '</div>' +
+            '<div class="meta">' + html(l.comoditie_nome || '') + ' · ' + html(l.quantidade || '') + ' ' + html(l.unidade || '') + '</div>' +
+            '<div class="mt-sm">' +
+            '<strong>Seu lance:</strong> ' +
+            '<span class="bid-badge">R$ ' + parseFloat(item.valor).toFixed(2) + '</span>' +
+            '</div>' +
+            '<div class="mt-sm text-muted text-sm">' + new Date(item.timestamp).toLocaleString('pt-BR') + '</div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
       } catch(e) {
         el.innerHTML = '<div class="alert alert-error">Erro ao carregar lances</div>';
       }

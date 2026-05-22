@@ -10,6 +10,7 @@ export async function authRoutes(fastify) {
     const { email, senha } = req.body || {};
     if (!email || !senha) return reply.code(400).send({ error: 'Email e senha obrigatórios' });
     try {
+      // AVISO: a API externa compara senha em plaintext — ideal seria usar bcrypt/argon2 com hash
       const r = await apiRequest('read', { table: 'usuarios', filters: { email, senha } });
       const users = r.data || [];
       if (!users.length) return reply.code(401).send({ error: 'Credenciais inválidas' });

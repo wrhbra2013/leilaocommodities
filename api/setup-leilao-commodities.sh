@@ -13,7 +13,12 @@ save_config() {
 
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    if command -v ss &>/dev/null; then
+      if ss -tlnp "sport = :$port" 2>/dev/null | grep -q LISTEN; then
+        echo "Porta $port já está em uso"
+        return 1
+      fi
+    elif lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
         echo "Porta $port já está em uso"
         return 1
     fi
@@ -22,7 +27,12 @@ check_port() {
 
 kill_port() {
     local port=$1
-    local pids=$(lsof -Pi :$port -t 2>/dev/null || true)
+    local pids=""
+    if command -v ss &>/dev/null; then
+      pids=$(ss -tlnp "sport = :$port" 2>/dev/null | grep -Po 'pid=\K[0-9]+' | tr '\n' ' ')
+    else
+      pids=$(lsof -Pi :$port -t 2>/dev/null || true)
+    fi
     if [ -n "$pids" ]; then
         echo "Matando processos na porta $port: $pids"
         echo "$pids" | xargs -r sudo kill -9 2>/dev/null || true

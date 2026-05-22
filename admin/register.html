@@ -5,8 +5,8 @@
   <title>Cadastro - Leilão Commodities</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <style>
-    .auth-container { max-width: 400px; margin: 4rem auto; background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .auth-container h1 { text-align: center; color: #1e3a5f; margin-bottom: 1.5rem; }
+    .auth-container { max-width: 400px; margin: 4rem auto; background: var(--color-surface); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-lg); }
+    .auth-container h1 { text-align: center; color: var(--color-primary); margin-bottom: 1.5rem; }
   </style>
 </head>
 <body>
@@ -29,11 +29,15 @@
       <label>Senha</label>
       <input type="password" id="reg-senha" class="form-control" placeholder="Min. 6 caracteres">
     </div>
+    <div class="form-group">
+      <label>Confirmar Senha</label>
+      <input type="password" id="reg-senha2" class="form-control" placeholder="Repita a senha">
+    </div>
     <button class="btn btn-success" onclick="cadastrar()" style="width:100%;">Criar Conta</button>
-    <p style="text-align:center;margin-top:1rem;color:#888;">
+    <p class="text-center text-muted" style="margin-top:1rem;">
       Já tem conta? <a href="/admin/login.html">Entrar</a>
     </p>
-    <p style="text-align:center;margin-top:0.5rem;">
+    <p class="text-center" style="margin-top:0.5rem;">
       <a href="/">← Voltar ao início</a>
     </p>
   </div>
@@ -45,8 +49,10 @@
       const email = document.getElementById('reg-email').value.trim();
       const telefone = document.getElementById('reg-telefone').value.trim();
       const senha = document.getElementById('reg-senha').value;
+      const senha2 = document.getElementById('reg-senha2').value;
       if (!nome || !email || !senha) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Preencha todos os campos obrigatórios</div>'; return; }
       if (senha.length < 6) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Senha deve ter no mínimo 6 caracteres</div>'; return; }
+      if (senha !== senha2) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Senhas não conferem</div>'; return; }
       const r = await API.register(nome, email, telefone, senha);
       if (r.success) {
         API.setToken(r.token);

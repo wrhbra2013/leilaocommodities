@@ -8,8 +8,8 @@
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-      <h1 style="color:#1e3a5f;margin:0;">🔨 Gerenciar Leilões</h1>
+    <div class="flex-between" style="margin-bottom:1.5rem;">
+      <h1 style="color:var(--color-primary);margin:0;">🔨 Gerenciar Leilões</h1>
       <button class="btn btn-success" onclick="abrirCriar()">+ Novo Leilão</button>
     </div>
     <div id="leiloes-list"><div class="loading">Carregando</div></div>
@@ -32,40 +32,41 @@
         <label>Commoditie</label>
         <select id="l-comoditie" class="form-control"></select>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="flex-row gap-md">
         <div class="form-group">
           <label>Quantidade</label>
-          <input type="number" id="l-quantidade" class="form-control" value="1">
+          <input type="number" id="l-quantidade" class="form-control" value="1" inputmode="decimal">
         </div>
         <div class="form-group">
           <label>Preço Inicial (R$)</label>
-          <input type="number" id="l-preco" class="form-control" step="0.01">
+          <input type="number" id="l-preco" class="form-control" step="0.01" inputmode="decimal">
         </div>
       </div>
       <div class="form-group">
         <label>Valor mínimo lance (R$)</label>
-        <input type="number" id="l-min-lance" class="form-control" step="0.01">
+        <input type="number" id="l-min-lance" class="form-control" step="0.01" inputmode="decimal">
       </div>
       <div class="form-group">
         <label>Data de término</label>
         <input type="datetime-local" id="l-data-fim" class="form-control">
       </div>
       <div id="status"></div>
-      <button class="btn btn-success" onclick="salvar()" style="width:100%;" id="btn-salvar">Criar Leilão</button>
+      <button class="btn btn-success" onclick="salvar()" id="btn-salvar" style="width:100%;">Criar Leilão</button>
     </div>
   </div>
 
   <script src="/static/js/api-client.js"></script>
   <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
+  <script src="/static/js/admin-modal.js"></script>
   <script>
-    let comods = [], editId = null;
+    let comods = [];
 
     async function init() {
       const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
       if (!API.token || user.nivel !== 'admin') { window.location.href = '/admin/login.html'; return; }
       comods = await API.getComodities();
-      document.getElementById('l-comoditie').innerHTML = comods.map(c => `<option value="${html(c.id)}">${html(c.icone)} ${html(c.nome)}</option>`).join('');
+      initAdminModal(comods);
       carregar();
     }
 
@@ -76,74 +77,32 @@
         ? `<table>
           <thead><tr><th>Título</th><th>Commoditie</th><th>Preço</th><th>Lances</th><th>Status</th><th>Término</th><th>Ações</th></tr></thead>
           <tbody>${ls.map(l => `<tr>
-            <td><a href="/paginas/leilao.html?id=${html(l.id)}">${html(l.titulo)}</a></td>
+            <td><a href="/paginas/leilao.html?id=${encodeURIComponent(l.id)}">${html(l.titulo)}</a></td>
             <td>${html(l.comoditie_nome)}</td>
-            <td style="font-weight:bold;color:#059669;">R$ ${parseFloat(l.preco_atual).toFixed(2)}</td>
+            <td class="text-success">R$ ${parseFloat(l.preco_atual).toFixed(2)}</td>
             <td>${l.total_lances || 0}</td>
             <td><span class="tag ${l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado'}">${html(l.status)}</span></td>
-            <td style="font-size:0.85rem;">${new Date(l.data_fim).toLocaleString('pt-BR')}</td>
+            <td class="text-sm">${new Date(l.data_fim).toLocaleString('pt-BR')}</td>
             <td>
-              <button class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="editar('${html(l.id)}')">Editar</button>
-              ${l.status === 'ativo' ? `<button class="btn btn-danger" style="padding:0.3rem 0.6rem;font-size:0.8rem;" onclick="encerrar('${html(l.id)}')">Encerrar</button>` : ''}
+              <button class="btn btn-outline btn-sm" onclick="editar('${encodeURIComponent(l.id)}')">Editar</button>
+              ${l.status === 'ativo' ? `<button class="btn btn-danger btn-sm" onclick="encerrar('${encodeURIComponent(l.id)}')">Encerrar</button>` : ''}
             </td>
           </tr>`).join('')}</tbody>
-        </table>` : '<p style="color:#888;">Nenhum leilão ainda</p>';
+        </table>` : '<p class="text-muted">Nenhum leilão ainda</p>';
     }
 
-    function abrirCriar() {
-      editId = null; document.getElementById('modal-title').textContent = 'Novo Leilão';
-      document.getElementById('btn-salvar').textContent = 'Criar Leilão';
-      ['l-titulo','l-descricao','l-preco','l-min-lance'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('l-quantidade').value = '1';
-      document.getElementById('l-data-fim').value = new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 16);
-      document.getElementById('status').innerHTML = '';
-      document.getElementById('modal-leilao').classList.add('active');
-    }
+    function abrirCriar() { modalAbrirCriar(); }
 
-    async function editar(id) {
-      const l = await API.getLeilao(id); editId = id;
-      document.getElementById('modal-title').textContent = 'Editar Leilão';
-      document.getElementById('btn-salvar').textContent = 'Salvar';
-      document.getElementById('l-titulo').value = l.titulo;
-      document.getElementById('l-descricao').value = l.descricao || '';
-      document.getElementById('l-comoditie').value = l.comoditie_id;
-      document.getElementById('l-quantidade').value = l.quantidade;
-      document.getElementById('l-preco').value = l.preco_inicial;
-      document.getElementById('l-min-lance').value = l.valor_minimo_lance || '';
-      document.getElementById('l-data-fim').value = new Date(l.data_fim).toISOString().slice(0, 16);
-      document.getElementById('status').innerHTML = '';
-      document.getElementById('modal-leilao').classList.add('active');
-    }
+    async function editar(id) { modalEditar(id); }
 
-    async function salvar() {
-      const data = {
-        titulo: document.getElementById('l-titulo').value.trim(),
-        descricao: document.getElementById('l-descricao').value.trim(),
-        comoditie_id: document.getElementById('l-comoditie').value,
-        quantidade: parseFloat(document.getElementById('l-quantidade').value),
-        preco_inicial: parseFloat(document.getElementById('l-preco').value),
-        valor_minimo_lance: parseFloat(document.getElementById('l-min-lance').value) || null,
-        data_fim: new Date(document.getElementById('l-data-fim').value).toISOString(),
-      };
-      if (!data.titulo || !data.comoditie_id || !data.preco_inicial) {
-        document.getElementById('status').innerHTML = '<div class="alert alert-error">Preencha título, commodity e preço</div>'; return;
-      }
-      const r = editId ? await API.updateLeilao({ ...data, id: editId }) : await API.criarLeilao(data);
-      if (r.success) {
-        document.getElementById('status').innerHTML = '<div class="alert alert-success">Salvo!</div>';
-        setTimeout(() => { fechar(); carregar(); }, 500);
-      } else {
-        document.getElementById('status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro') + '</div>';
-      }
-    }
+    async function salvar() { modalSalvar(() => carregar()); }
 
     async function encerrar(id) {
-      if (!confirm('Encerrar este leilão?')) return;
-      const r = await API.updateLeilao({ id, status: 'encerrado' });
-      if (r.success) carregar();
+      const ok = await modalEncerrar(id);
+      if (ok) carregar();
     }
 
-    function fechar() { document.getElementById('modal-leilao').classList.remove('active'); }
+    function fechar() { modalFechar(); }
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>

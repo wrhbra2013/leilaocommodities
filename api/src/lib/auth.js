@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
+const JWT_SECRET = process.env.JWT_SECRET || (console.warn('[auth] JWT_SECRET não definido — usando fallback volátil (sessões invalidadas no restart)'), crypto.randomUUID());
 
 export function signToken(user) {
   return jwt.sign(

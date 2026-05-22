@@ -5,20 +5,20 @@
   <title>Cotações - Leilão Commodities</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <style>
-    .cotacao-card { background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    .cotacao-card { background:var(--color-surface);border-radius:12px;padding:1.5rem;box-shadow:var(--shadow-sm);border:1px solid var(--color-border); }
     .cotacao-card .header { display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem; }
     .cotacao-card .icon { font-size:2rem; }
-    .cotacao-card .nome { font-weight:600;font-size:1.1rem; }
-    .cotacao-card .preco { font-size:1.8rem;font-weight:bold;color:#059669; }
-    .cotacao-card .detalhes { display:flex;gap:1rem;margin-top:0.5rem;font-size:0.9rem;color:#666; }
-    .cotacao-card .grafico { margin-top:1rem;height:60px;background:linear-gradient(90deg,#d1fae5,#a7f3d0,#6ee7b7);border-radius:8px; }
+    .cotacao-card .nome { font-weight:600;font-size:1.1rem;color:var(--color-text); }
+    .cotacao-card .preco { font-size:1.8rem;font-weight:bold;color:var(--color-success); }
+    .cotacao-card .detalhes { display:flex;gap:1rem;margin-top:0.5rem;font-size:0.9rem;color:var(--color-text-secondary); }
+    .cotacao-card .grafico { margin-top:1rem;height:60px;background:linear-gradient(90deg,#05966940,#05966980,#059669);border-radius:8px; }
   </style>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <h1 style="color:#1e3a5f;margin-bottom:0.5rem;">📈 Cotações do Mercado</h1>
-    <p style="color:#666;margin-bottom:2rem;">Preços atualizados em tempo real das principais commodities</p>
+    <h1 class="page-title">📈 Cotações do Mercado</h1>
+    <p class="page-subtitle" style="margin-bottom:2rem;">Preços atualizados em tempo real das principais commodities</p>
     <div id="status-cotacao" class="alert alert-info" style="display:none;"></div>
     <div id="cotacoes-list"></div>
   </main>
@@ -40,14 +40,14 @@
               <div><span class="icon">${html(c.icone)}</span> <span class="nome">${html(c.nome)}</span></div>
               <span class="tag">${html(c.unidade)}</span>
             </div>
-            <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '<span style="color:#888;">Indisponível</span>'}</div>
+            <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '<span class="text-muted">Indisponível</span>'}</div>
             <div class="detalhes">
               <span>Variação: <strong class="${varClass}">${cot.variacao || '--'}</strong></span>
               <span>Data: ${cot.data || '--'}</span>
             </div>
             <div class="grafico"></div>
             <div style="margin-top:1rem;">
-              <a href="/paginas/leiloes.html?comoditie=${c.slug}" class="btn btn-outline" style="padding:0.5rem 1rem;font-size:0.85rem;">Ver Leilões</a>
+              <a href="/paginas/leiloes.html?comoditie=${c.slug}" class="btn btn-outline btn-sm" style="padding:0.5rem 1rem;">Ver Leilões</a>
             </div>
           </div>`;
         }).join('');

@@ -43,18 +43,18 @@ export async function adminRoutes(fastify) {
       const leiloes = r.data || [];
       for (const l of leiloes) {
         if (l.comoditie_id) {
-          try { const c = await apiRequest('read', { table: 'comodities', filters: { id: l.comoditie_id } }); if (c.data?.[0]) l.comoditie_nome = c.data[0].nome; } catch {}
+          try { const c = await apiRequest('read', { table: 'comodities', filters: { id: l.comoditie_id } }); if (c.data?.[0]) l.comoditie_nome = c.data[0].nome; } catch (e) { req.log.error(e, 'fetch commodity for admin'); }
         }
-        try { const lc = await apiRequest('read', { table: 'lances', filters: { leilao_id: l.id } }); l.total_lances = (lc.data || []).length; } catch { l.total_lances = 0; }
+        try { const lc = await apiRequest('read', { table: 'lances', filters: { leilao_id: l.id } }); l.total_lances = (lc.data || []).length; } catch (e) { req.log.error(e, 'fetch bid count for admin'); l.total_lances = 0; }
       }
       return { data: leiloes };
-    } catch { return { data: [] }; }
+    } catch (e) { req.log.error(e, 'admin leiloes'); return { data: [] }; }
   });
 
   fastify.post('/api/admin/usuarios', async (req, reply) => {
     try {
       const r = await apiRequest('read', { table: 'usuarios', order_by: 'created_at', order_dir: 'DESC' });
       return { data: (r.data || []).map(u => ({ id: u.id, nome: u.nome, email: u.email, telefone: u.telefone, nivel: u.nivel, created_at: u.created_at })) };
-    } catch { return { data: [] }; }
+    } catch (e) { req.log.error(e, 'admin usuarios'); return { data: [] }; }
   });
 }

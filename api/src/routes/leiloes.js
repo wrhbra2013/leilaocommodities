@@ -9,7 +9,7 @@ export async function leiloesRoutes(fastify) {
       if (status) filters.status = status;
       const r = await apiRequest('read', { table: 'leiloes', filters, limit, offset, order_by: 'data_fim', order_dir: 'ASC' });
       return { data: r.data || [] };
-    } catch { return { data: [] }; }
+    } catch (e) { req.log.error(e, 'leiloes list'); return { data: [] }; }
   });
 
   fastify.get('/api/leiloes/:id', async (req, reply) => {
@@ -20,15 +20,15 @@ export async function leiloesRoutes(fastify) {
       try {
         const lancesR = await apiRequest('read', { table: 'lances', filters: { leilao_id: req.params.id }, order_by: 'valor', order_dir: 'DESC' });
         leilao.lances = lancesR.data || [];
-      } catch { leilao.lances = []; }
+      } catch (e) { req.log.error(e, 'fetch bids for leilao'); leilao.lances = []; }
       if (leilao.comoditie_id) {
         try {
           const comR = await apiRequest('read', { table: 'comodities', filters: { id: leilao.comoditie_id } });
           const c = comR.data?.[0];
           if (c) { leilao.comoditie_nome = c.nome; leilao.comoditie_slug = c.slug; leilao.unidade = c.unidade; leilao.icone = c.icone; }
-        } catch {}
+        } catch (e) { req.log.error(e, 'fetch commodity for leilao'); }
       }
       return leilao;
-    } catch { return reply.code(502).send({ error: 'Serviço indisponível' }); }
+    } catch (e) { req.log.error(e, 'leilao get'); return reply.code(502).send({ error: 'Serviço indisponível' }); }
   });
 }

@@ -4,11 +4,33 @@ import { authenticate } from '../lib/auth.js';
 function validateId(id) { return /^[a-zA-Z0-9_-]{1,128}$/.test(id); }
 
 export async function lancesRoutes(fastify) {
+  fastify.get('/api/meus-lances', { preHandler: [authenticate] }, async (req, reply) => {
+    try {
+      const r = await apiRequest('read', { table: 'lances', filters: { usuario_id: req.user.id }, order_by: 'timestamp', order_dir: 'DESC' });
+      const lances = r.data || [];
+      const leilaoIds = [...new Set(lances.map(l => l.leilao_id))];
+      const leiloes = {};
+      for (const id of leilaoIds) {
+        try {
+          const lr = await apiRequest('read', { table: 'leiloes', filters: { id } });
+          if (lr.data?.[0]) {
+            const lei = lr.data[0];
+            if (lei.comoditie_id) {
+              try { const cr = await apiRequest('read', { table: 'comodities', filters: { id: lei.comoditie_id } }); if (cr.data?.[0]) { lei.comoditie_nome = cr.data[0].nome; lei.unidade = cr.data[0].unidade; } } catch {}
+            }
+            leiloes[id] = lei;
+          }
+        } catch {}
+      }
+      return { data: lances.map(l => ({ ...l, leilao: leiloes[l.leilao_id] || null })) };
+    } catch (e) { req.log.error(e, 'meus lances'); return { data: [] }; }
+  });
+
   fastify.get('/api/lances/:leilao_id', async (req, reply) => {
     try {
       const r = await apiRequest('read', { table: 'lances', filters: { leilao_id: req.params.leilao_id }, order_by: 'valor', order_dir: 'DESC' });
       return r.data || [];
-    } catch { return []; }
+    } catch (e) { req.log.error(e, 'lances list'); return []; }
   });
 
   fastify.post('/api/lances/criar', { preHandler: [authenticate] }, async (req, reply) => {

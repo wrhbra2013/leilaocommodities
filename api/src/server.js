@@ -19,8 +19,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const fastify = Fastify({ logger: true });
 
-await fastify.register(cors, { origin: true });
-await fastify.register(rateLimit, { max: 100, timeWindow: '1 minute' });
+await fastify.register(cors, { origin: false });
+await fastify.register(rateLimit, { max: 200, timeWindow: '1 minute' });
 
 await fastify.register(authRoutes);
 await fastify.register(commoditiesRoutes);
@@ -36,6 +36,7 @@ await fastify.register(fastifyStatic, {
 });
 
 fastify.setNotFoundHandler(async (req, res) => {
+  if (req.url.startsWith('/api/')) return res.code(404).send({ error: 'Rota não encontrada' });
   const idx = path.join(PROJECT_ROOT, 'index.html');
   if (fs.existsSync(idx)) { const c = await fs.promises.readFile(idx, 'utf-8'); res.type('text/html').send(c); }
   else res.code(404).send('Not Found');
