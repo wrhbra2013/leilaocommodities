@@ -9,8 +9,8 @@
   <meta property="og:title" content="Leilao Commodities">
   <meta property="og:description" content="Leilão de commodities agrícolas online. Participe e faça seus lances em tempo real.">
   <meta property="og:type" content="website">
-  <link rel="icon" type="image/svg+xml" href="/static/icon/favicon.svg">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="static/css/style.css">
+  <script>var basePath = '';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
@@ -18,48 +18,44 @@
   <main class="main-content">
 
     <section class="hero">
-      <span class="hero-badge">🔴 LEILÕES AO VIVO</span>
+      <span class="hero-badge">LEILÕES AO VIVO</span>
       <h1>Commodities Agrícolas<br>em Leilão Online</h1>
       <p>Participe de leilões de soja, milho, café, boi gordo e mais. Preços em tempo real com cotações do mercado.</p>
-      <a href="/paginas/leiloes.html" class="btn btn-primary btn-lg">Ver Leilões</a>
-      <a href="/admin/register.html" class="btn btn-outline btn-lg">Criar Conta</a>
+      <a href="paginas/leiloes.html" class="btn btn-primary btn-lg">Ver Leilões</a>
+      <a href="admin/register.html" class="btn btn-outline btn-lg">Criar Conta</a>
     </section>
 
     <section class="section">
-      <h2 class="section-title">📈 Cotações em Tempo Real</h2>
+      <h2 class="section-title">Cotações em Tempo Real</h2>
       <p class="section-subtitle">Acompanhe os preços atualizados das principais commodities do mercado</p>
       <div class="commodities-grid" id="cotacoes-grid">
       </div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">🔨 Leilões em Destaque</h2>
+      <h2 class="section-title">Leilões em Destaque</h2>
       <p class="section-subtitle">Os melhores negócios em commodities esperando por você</p>
       <div class="card-grid" id="leiloes-destaque">
       </div>
     </section>
 
     <section class="section">
-      <h2 class="section-title">📋 Como Funciona</h2>
+      <h2 class="section-title">Como Funciona</h2>
       <p class="section-subtitle">Participar dos leilões é simples e rápido</p>
       <div class="steps-grid">
         <div class="step-card">
-          <div class="step-icon">📝</div>
           <h3>Crie sua Conta</h3>
           <p>Cadastre-se gratuitamente e tenha acesso a todos os leilões disponíveis na plataforma.</p>
         </div>
         <div class="step-card">
-          <div class="step-icon">🔍</div>
           <h3>Explore os Leilões</h3>
           <p>Navegue pelos leilões ativos, filtre por commodity e encontre as melhores oportunidades.</p>
         </div>
         <div class="step-card">
-          <div class="step-icon">💰</div>
           <h3>Faça seus Lances</h3>
           <p>Participe em tempo real com lances competitivos e acompanhe o andamento do leilão.</p>
         </div>
         <div class="step-card">
-          <div class="step-icon">🎯</div>
           <h3>Arremate e Receba</h3>
           <p>Vença o leilão e receba sua commodity com toda segurança e suporte necessário.</p>
         </div>
@@ -67,46 +63,40 @@
     </section>
 
     <section class="section">
-      <h2 class="section-title">✅ Por que escolher a Leilao Commodities?</h2>
+      <h2 class="section-title">Por que escolher a Leilao Commodities?</h2>
       <p class="section-subtitle">Uma plataforma completa para compra e venda de commodities agrícolas</p>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">📊</div>
           <div>
             <h3>Cotações em Tempo Real</h3>
             <p>Acompanhe os preços do mercado atualizados automaticamente para tomar melhores decisões.</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🔒</div>
           <div>
             <h3>Segurança e Transparência</h3>
             <p>Todos os lances são registrados e auditados, garantindo um processo justo e seguro para todos.</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📱</div>
           <div>
             <h3>Plataforma Responsiva</h3>
             <p>Acesse de qualquer dispositivo — computador, tablet ou celular — com experiência adaptada.</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🌾</div>
           <div>
             <h3>Diversidade de Commodities</h3>
             <p>Soja, milho, café, boi gordo e muito mais. Encontre a commodity ideal para seu negócio.</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">⏱️</div>
           <div>
             <h3>Suporte Dedicado</h3>
             <p>Equipe pronta para ajudar em cada etapa, desde o cadastro até a finalização do negócio.</p>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📈</div>
           <div>
             <h3>Histórico Completo</h3>
             <p>Acompanhe seu histórico de lances e leilões participantes para gerenciar seus negócios.</p>
@@ -118,59 +108,62 @@
     <section class="cta-section">
       <h2>Pronto para começar?</h2>
       <p>Cadastre-se agora e participe dos melhores leilões de commodities agrícolas do mercado.</p>
-      <a href="/admin/register.html" class="btn btn-warning btn-lg">Criar Conta Grátis</a>
+      <a href="admin/register.html" class="btn btn-warning btn-lg">Criar Conta Grátis</a>
     </section>
 
   </main>
 
   <div id="footer-placeholder"></div>
 
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
+  <script src="static/js/api-client.js"></script>
+  <script src="static/js/helpers.js"></script>
+  <script src="static/js/components.js"></script>
   <script>
-    async function carregarCotacoes() {
+    function carregarCotacoes() {
       var grid = document.getElementById('cotacoes-grid');
       try {
-        var cotacoes = await API.getCotacoes();
-        var comods = await API.getComodities();
-        grid.innerHTML = comods.map(function(c) {
-          var cot = cotacoes[c.slug] || {};
-          var varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
-          return '<div class="commodity-card" onclick="location.href=\'/paginas/comodities.html?slug=' + encodeURIComponent(c.slug) + '\'">' +
-            '<div class="icon">' + html(c.icone) + '</div>' +
-            '<div class="nome">' + html(c.nome) + '</div>' +
-            '<div class="preco">R$ ' + (cot.preco ? cot.preco.toFixed(2) : '--') + '</div>' +
-            '<div class="variacao ' + varClass + '">' + (cot.variacao || '--') + '</div>' +
-            '<div class="text-sm text-muted">' + html(c.unidade) + '</div>' +
-            '</div>';
-        }).join('');
+        API.getCotacoes().then(function(cotacoes) {
+          API.getComodities().then(function(comods) {
+            grid.innerHTML = comods.map(function(c) {
+              var cot = cotacoes[c.slug] || {};
+              var varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
+              return '<div class="commodity-card" onclick="location.href=\'' + basePath + 'paginas/comodities.html?slug=' + encodeURIComponent(c.slug) + '\'">' +
+                '' +
+                '<div class="nome">' + html(c.nome) + '</div>' +
+                '<div class="preco">R$ ' + (cot.preco ? cot.preco.toFixed(2) : '--') + '</div>' +
+                '<div class="variacao ' + varClass + '">' + (cot.variacao || '--') + '</div>' +
+                '<div class="text-sm text-muted">' + html(c.unidade) + '</div>' +
+                '</div>';
+            }).join('');
+          }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';});
+        }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';});
       } catch(e) {
-        grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis no momento</p>';
+        grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';
       }
     }
 
-    async function carregarLeiloes() {
+    function carregarLeiloes() {
       var grid = document.getElementById('leiloes-destaque');
       try {
-        var r = await API.listLeiloes({ status: 'ativo', limit: 6 });
-        if (!r.data || !r.data.length) {
-          grid.innerHTML = '<p class="text-center text-muted p-xl">Nenhum leilão ativo no momento</p>';
-          return;
-        }
-        grid.innerHTML = r.data.map(function(l) {
-          var tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
-          return '<div class="card" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id) + '\'">' +
-            '<div class="card-body">' +
-            '<div class="card-icon">' + html(l.icone || '📦') + '</div>' +
-            '<h3>' + html(l.titulo) + '</h3>' +
-            '<div class="tag ' + tagCls + '">' + (l.status === 'ativo' ? 'Ativo' : 'Encerrado') + '</div>' +
-            '<div class="preco">R$ ' + parseFloat(l.preco_atual).toFixed(2) + '</div>' +
-            '<div class="meta">' + html(l.comoditie_nome) + ' · ' + html(l.quantidade) + ' ' + html(l.unidade) + '</div>' +
-            '<div class="meta">' + (l.total_lances || 0) + ' lance(s)</div>' +
-            '</div>' +
-            '</div>';
-        }).join('');
+        API.listLeiloes({ status: 'ativo', limit: 6 }).then(function(r) {
+          if (!r.data || !r.data.length) {
+            grid.innerHTML = '<p class="text-center text-muted p-xl">Nenhum leilão ativo</p>';
+            return;
+          }
+          grid.innerHTML = r.data.map(function(l) {
+            var tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
+            return '<div class="card" onclick="location.href=\'' + basePath + 'paginas/leilao.html?id=' + encodeURIComponent(l.id) + '\'">' +
+              '<div class="card-body">' +
+              '' +
+              '<h3>' + html(l.titulo) + '</h3>' +
+              '<div class="tag ' + tagCls + '">' + (l.status === 'ativo' ? 'Ativo' : 'Encerrado') + '</div>' +
+              '<div class="preco">R$ ' + parseFloat(l.preco_atual).toFixed(2) + '</div>' +
+              '<div class="meta">' + html(l.comoditie_nome) + ' · ' + html(l.quantidade) + ' ' + html(l.unidade) + '</div>' +
+              '<div class="meta">' + (l.total_lances || 0) + ' lance(s)</div>' +
+              '</div>' +
+              '</div>';
+          }).join('');
+        }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';});
       } catch(e) {
         grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';
       }

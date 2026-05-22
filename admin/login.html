@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entrar - Leilão Commodities</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script>var basePath = '../';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
   <div class="auth-container">
-    <h1>📊 Entrar</h1>
+    <h1>Entrar</h1>
     <div id="login-status"></div>
     <div class="form-group">
       <label>Email</label>
@@ -21,17 +22,17 @@
     </div>
     <button class="btn btn-primary w-full" onclick="entrar()">Entrar</button>
     <p class="text-center text-muted mt-md">
-      Não tem conta? <a href="/admin/register.html">Cadastre-se</a>
+      Não tem conta?       <a href="register.html">Cadastre-se</a>
     </p>
     <p class="text-center mt-sm">
-      <a href="/">← Voltar ao início</a>
+      <a href="../index.html">← Voltar ao início</a>
     </p>
   </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
+  <script src="../static/js/api-client.js"></script>
+  <script src="../static/js/helpers.js"></script>
+  <script src="../static/js/components.js"></script>
   <script>
     async function entrar() {
       const email = document.getElementById('login-email').value.trim();
@@ -41,7 +42,7 @@
       if (r.success) {
         API.setToken(r.token);
         localStorage.setItem('lcm_user', JSON.stringify(r.user));
-        const redirect = new URLSearchParams(window.location.search).get('redirect') || '/admin/index.html';
+        const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
         window.location.href = redirect;
       } else {
         document.getElementById('login-status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro ao entrar') + '</div>';

@@ -3,22 +3,23 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuários - Leilão Commodities</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script>var basePath = '../';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <h1 class="page-title-lg">👥 Usuários Cadastrados</h1>
+    <h1 class="page-title-lg">Usuários Cadastrados</h1>
     <div id="usuarios-list"><div class="loading">Carregando</div></div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
+  <script src="../static/js/api-client.js"></script>
+  <script src="../static/js/helpers.js"></script>
+  <script src="../static/js/components.js"></script>
   <script>
     async function init() {
       const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
-      if (!API.token || user.nivel !== 'admin') { window.location.href = '/admin/login.html'; return; }
+      if (!API.token || user.nivel !== 'admin') { window.location.href = 'login.html'; return; }
       const r = await API.adminUsuarios();
       const usuarios = r.data || [];
       document.getElementById('usuarios-list').innerHTML = usuarios.length

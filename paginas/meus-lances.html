@@ -3,35 +3,36 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Lances - Leilao Commodities</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script>var basePath = '../';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <h1 class="page-title-lg">💰 Meus Lances</h1>
+    <h1 class="page-title-lg">Meus Lances</h1>
     <div id="lances-container">
       <div class="loading">Carregando seus lances</div>
     </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
+  <script src="../static/js/api-client.js"></script>
+  <script src="../static/js/helpers.js"></script>
+  <script src="../static/js/components.js"></script>
   <script>
     async function init() {
-      if (!API.token) { window.location.href = '/admin/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
+      if (!API.token) { window.location.href = basePath + 'admin/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
       const el = document.getElementById('lances-container');
       try {
         const r = await API.meusLances();
         const items = r.data || [];
         if (!items.length) {
-          el.innerHTML = '<div class="alert alert-info">Você ainda não deu lances em nenhum leilão. <a href="/paginas/leiloes.html">Ver leilões ativos</a></div>';
+          el.innerHTML = '<div class="alert alert-info">Você ainda não deu lances em nenhum leilão. <a href="leiloes.html">Ver leilões ativos</a></div>';
           return;
         }
         el.innerHTML = items.map(item => {
           const l = item.leilao || {};
           const lances = [item];
-          return '<div class="card mb-md" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
+          return '<div class="card mb-md" onclick="location.href=\'leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
             '<div class="card-body">' +
             '<div class="flex-between">' +
             '<h3>' + html(l.titulo || 'Leilão') + '</h3>' +

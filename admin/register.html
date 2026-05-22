@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro - Leilão Commodities</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script>var basePath = '../';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
   <div class="auth-container">
-    <h1>📊 Criar Conta</h1>
+    <h1>Criar Conta</h1>
     <div id="register-status"></div>
     <div class="form-group">
       <label>Nome completo</label>
@@ -33,17 +34,17 @@
     </div>
     <button class="btn btn-success w-full" onclick="cadastrar()">Criar Conta</button>
     <p class="text-center text-muted mt-md">
-      Já tem conta? <a href="/admin/login.html">Entrar</a>
+      Já tem conta?       <a href="login.html">Entrar</a>
     </p>
     <p class="text-center mt-sm">
-      <a href="/">← Voltar ao início</a>
+      <a href="../index.html">← Voltar ao início</a>
     </p>
   </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
+  <script src="../static/js/api-client.js"></script>
+  <script src="../static/js/helpers.js"></script>
+  <script src="../static/js/components.js"></script>
   <script>
     async function cadastrar() {
       const nome = document.getElementById('reg-nome').value.trim();
@@ -59,7 +60,7 @@
         API.setToken(r.token);
         localStorage.setItem('lcm_user', JSON.stringify(r.user));
         document.getElementById('register-status').innerHTML = '<div class="alert alert-success">Conta criada! Redirecionando...</div>';
-        setTimeout(() => window.location.href = '/admin/index.html', 1000);
+        setTimeout(function(){window.location.href = 'index.html';}, 1000);
       } else {
         document.getElementById('register-status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro ao cadastrar') + '</div>';
       }

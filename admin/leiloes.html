@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerenciar Leilões - Leilão Commodities</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <script>var basePath = '../';</script>
 </head>
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
     <div class="flex-between mb-lg">
-      <h1 class="page-title m-0">🔨 Gerenciar Leilões</h1>
+      <h1 class="page-title m-0">Gerenciar Leilões</h1>
       <button class="btn btn-success" onclick="abrirCriar()">+ Novo Leilão</button>
     </div>
     <div id="leiloes-list"><div class="loading">Carregando</div></div>
@@ -55,16 +56,16 @@
     </div>
   </div>
 
-  <script src="/static/js/api-client.js"></script>
-  <script src="/static/js/helpers.js"></script>
-  <script src="/static/js/components.js"></script>
-  <script src="/static/js/admin-modal.js"></script>
+  <script src="../static/js/api-client.js"></script>
+  <script src="../static/js/helpers.js"></script>
+  <script src="../static/js/components.js"></script>
+  <script src="../static/js/admin-modal.js"></script>
   <script>
     let comods = [];
 
     async function init() {
       const user = JSON.parse(localStorage.getItem('lcm_user') || '{}');
-      if (!API.token || user.nivel !== 'admin') { window.location.href = '/admin/login.html'; return; }
+      if (!API.token || user.nivel !== 'admin') { window.location.href = 'login.html'; return; }
       comods = await API.getComodities();
       initAdminModal(comods);
       carregar();
@@ -77,15 +78,15 @@
         ? `<table>
           <thead><tr><th>Título</th><th>Commoditie</th><th>Preço</th><th>Lances</th><th>Status</th><th>Término</th><th>Ações</th></tr></thead>
           <tbody>${ls.map(l => `<tr>
-            <td><a href="/paginas/leilao.html?id=${encodeURIComponent(l.id)}">${html(l.titulo)}</a></td>
+            <td><a href="../paginas/leilao.html?id=${encodeURIComponent(l.id)}">${html(l.titulo)}</a></td>
             <td>${html(l.comoditie_nome)}</td>
             <td class="text-success">R$ ${parseFloat(l.preco_atual).toFixed(2)}</td>
             <td>${l.total_lances || 0}</td>
             <td><span class="tag ${l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado'}">${html(l.status)}</span></td>
             <td class="text-sm">${new Date(l.data_fim).toLocaleString('pt-BR')}</td>
             <td>
-              <button class="btn btn-outline btn-sm" onclick="editar('${encodeURIComponent(l.id)}')">Editar</button>
-              ${l.status === 'ativo' ? `<button class="btn btn-danger btn-sm" onclick="encerrar('${encodeURIComponent(l.id)}')">Encerrar</button>` : ''}
+              <button class="btn btn-outline btn-sm" onclick="editar('${l.id}')">Editar</button>
+              ${l.status === 'ativo' ? `<button class="btn btn-danger btn-sm" onclick="encerrar('${l.id}')">Encerrar</button>` : ''}
             </td>
           </tr>`).join('')}</tbody>
         </table>` : '<p class="text-muted">Nenhum leilão ainda</p>';
