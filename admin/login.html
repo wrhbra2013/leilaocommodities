@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
   <div class="auth-container">
     <h1>📊 Entrar</h1>
     <div id="login-status"></div>
@@ -25,8 +27,11 @@
       <a href="/">← Voltar ao início</a>
     </p>
   </div>
+  </main>
+  <div id="footer-placeholder"></div>
   <script src="/static/js/api-client.js"></script>
   <script src="/static/js/helpers.js"></script>
+  <script src="/static/js/components.js"></script>
   <script>
     async function entrar() {
       const email = document.getElementById('login-email').value.trim();

@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+  <div id="header-placeholder"></div>
+  <main class="main-content">
   <div class="auth-container">
     <h1>📊 Criar Conta</h1>
     <div id="register-status"></div>
@@ -37,8 +39,11 @@
       <a href="/">← Voltar ao início</a>
     </p>
   </div>
+  </main>
+  <div id="footer-placeholder"></div>
   <script src="/static/js/api-client.js"></script>
   <script src="/static/js/helpers.js"></script>
+  <script src="/static/js/components.js"></script>
   <script>
     async function cadastrar() {
       const nome = document.getElementById('reg-nome').value.trim();

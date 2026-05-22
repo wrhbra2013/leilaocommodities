@@ -7,7 +7,7 @@ const API_TOKEN = process.env.API_TOKEN || (console.warn('[api-client] API_TOKEN
 export async function apiRequest(action, body = {}) {
   const res = await fetch(`${EXTERNAL_API}/api/${action}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}`, 'User-Agent': 'LeilapCommodities/1.0' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}`, 'User-Agent': 'LeilaoCommodities/1.0' },
     body: JSON.stringify({ project: 'leilao-commodities', ...body }),
   });
   if (!res.ok) {

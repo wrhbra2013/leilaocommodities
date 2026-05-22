@@ -116,6 +116,10 @@ a:hover { text-decoration: underline; }
 
 .header-title:hover { text-decoration: none; opacity: 0.9; }
 
+.header-logo { display: flex; align-items: center; }
+.header-logo:hover { opacity: 0.9; }
+.header-logo img { display: block; height: 36px; width: auto; }
+
 .main-nav ul {
   list-style: none;
   display: flex;
@@ -193,6 +197,7 @@ a:hover { text-decoration: underline; }
   .main-nav.is-active { display: block; animation: slideDown 0.25s ease; }
   .main-nav ul { flex-direction: column; gap: 0.8rem; }
   .header-title { font-size: 1.1rem; }
+  .header-logo img { height: 28px; }
 }
 
 @keyframes slideDown {

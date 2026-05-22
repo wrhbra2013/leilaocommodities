@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leilap Commodities - Leilão de Commodities Agrícolas Online</title>
+  <title>Leilao Commodities - Leilão de Commodities Agrícolas Online</title>
   <meta name="description" content="Participe de leilões online de soja, milho, café, boi gordo e mais. Preços em tempo real com cotações do mercado agrícola.">
   <meta name="keywords" content="leilão, commodities, soja, milho, café, boi gordo, agro, agronegócio, cotações">
-  <meta property="og:title" content="Leilap Commodities">
+  <meta property="og:title" content="Leilao Commodities">
   <meta property="og:description" content="Leilão de commodities agrícolas online. Participe e faça seus lances em tempo real.">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="/static/icon/favicon.svg">
@@ -16,6 +16,7 @@
   <div id="header-placeholder"></div>
 
   <main class="main-content">
+
     <section class="hero">
       <span class="hero-badge">🔴 LEILÕES AO VIVO</span>
       <h1>Commodities Agrícolas<br>em Leilão Online</h1>
@@ -28,12 +29,6 @@
       <h2 class="section-title">📈 Cotações em Tempo Real</h2>
       <p class="section-subtitle">Acompanhe os preços atualizados das principais commodities do mercado</p>
       <div class="commodities-grid" id="cotacoes-grid">
-        <div class="skeleton-grid" id="skeleton-cotacoes">
-          <div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>
-        </div>
       </div>
     </section>
 
@@ -41,11 +36,6 @@
       <h2 class="section-title">🔨 Leilões em Destaque</h2>
       <p class="section-subtitle">Os melhores negócios em commodities esperando por você</p>
       <div class="card-grid" id="leiloes-destaque">
-        <div class="skeleton-grid-cards" id="skeleton-leiloes">
-          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
-        </div>
       </div>
     </section>
 
@@ -77,7 +67,7 @@
     </section>
 
     <section class="section">
-      <h2 class="section-title">✅ Por que escolher a Leilap Commodities?</h2>
+      <h2 class="section-title">✅ Por que escolher a Leilao Commodities?</h2>
       <p class="section-subtitle">Uma plataforma completa para compra e venda de commodities agrícolas</p>
       <div class="features-grid">
         <div class="feature-card">
@@ -130,37 +120,23 @@
       <p>Cadastre-se agora e participe dos melhores leilões de commodities agrícolas do mercado.</p>
       <a href="/admin/register.html" class="btn btn-warning btn-lg">Criar Conta Grátis</a>
     </section>
+
   </main>
 
   <div id="footer-placeholder"></div>
+
   <script src="/static/js/api-client.js"></script>
   <script src="/static/js/helpers.js"></script>
   <script src="/static/js/components.js"></script>
   <script>
-    function renderSkeleton(id, count, type) {
-      const container = document.getElementById(id);
-      if (!container) return '';
-      const items = [];
-      for (let i = 0; i < count; i++) {
-        if (type === 'commodity') {
-          items.push('<div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>');
-        } else {
-          items.push('<div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>');
-        }
-      }
-      return items.join('');
-    }
-
     async function carregarCotacoes() {
-      const grid = document.getElementById('cotacoes-grid');
-      const skeleton = document.getElementById('skeleton-cotacoes');
+      var grid = document.getElementById('cotacoes-grid');
       try {
-        const cotacoes = await API.getCotacoes();
-        const comods = await API.getComodities();
-        if (skeleton) skeleton.remove();
-        grid.innerHTML = comods.map(c => {
-          const cot = cotacoes[c.slug] || {};
-          const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
+        var cotacoes = await API.getCotacoes();
+        var comods = await API.getComodities();
+        grid.innerHTML = comods.map(function(c) {
+          var cot = cotacoes[c.slug] || {};
+          var varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
           return '<div class="commodity-card" onclick="location.href=\'/paginas/comodities.html?slug=' + encodeURIComponent(c.slug) + '\'">' +
             '<div class="icon">' + html(c.icone) + '</div>' +
             '<div class="nome">' + html(c.nome) + '</div>' +
@@ -170,23 +146,20 @@
             '</div>';
         }).join('');
       } catch(e) {
-        if (skeleton) skeleton.remove();
         grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis no momento</p>';
       }
     }
 
     async function carregarLeiloes() {
-      const grid = document.getElementById('leiloes-destaque');
-      const skeleton = document.getElementById('skeleton-leiloes');
+      var grid = document.getElementById('leiloes-destaque');
       try {
-        const r = await API.listLeiloes({ status: 'ativo', limit: 6 });
-        if (skeleton) skeleton.remove();
+        var r = await API.listLeiloes({ status: 'ativo', limit: 6 });
         if (!r.data || !r.data.length) {
           grid.innerHTML = '<p class="text-center text-muted p-xl">Nenhum leilão ativo no momento</p>';
           return;
         }
-        grid.innerHTML = r.data.map(l => {
-          const tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
+        grid.innerHTML = r.data.map(function(l) {
+          var tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
           return '<div class="card" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id) + '\'">' +
             '<div class="card-body">' +
             '<div class="card-icon">' + html(l.icone || '📦') + '</div>' +
@@ -199,12 +172,11 @@
             '</div>';
         }).join('');
       } catch(e) {
-        if (skeleton) skeleton.remove();
         grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       carregarCotacoes();
       carregarLeiloes();
     });

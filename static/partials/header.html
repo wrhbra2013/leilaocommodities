@@ -1,0 +1,22 @@
+<header class="header">
+  <div class="header-container">
+    <a href="/" class="header-logo" aria-label="Leilao Commodities">
+      <img src="/static/icon/logo.svg" alt="Leilao Commodities" height="36">
+    </a>
+    <input type="checkbox" id="menu-toggle" class="menu-checkbox">
+    <label for="menu-toggle" class="sandwich-button" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </label>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="/" data-page="home">Home</a></li>
+        <li><a href="/paginas/comodities.html" data-page="comodities">Cotações</a></li>
+        <li><a href="/paginas/leiloes.html" data-page="leiloes">Leilões</a></li>
+        <li id="nav-meus-lances" style="display:none;"><a href="/paginas/meus-lances.html" data-page="meus-lances">Meus Lances</a></li>
+        <li id="nav-admin" style="display:none;"><a href="/admin/index.html" data-page="admin">Admin</a></li>
+        <li id="nav-entrar"><a href="/admin/login.html" data-page="login">Entrar</a></li>
+        <li id="nav-sair" style="display:none;"><a href="#" onclick="logout()" class="nav-sair">Sair</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
