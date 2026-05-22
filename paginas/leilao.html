@@ -20,7 +20,7 @@
         <label>Valor do lance (R$)</label>
         <input type="number" id="lance-valor" class="form-control" step="0.01" min="0" inputmode="decimal">
       </div>
-      <button class="btn btn-primary" onclick="confirmarLance()" style="width:100%;">Confirmar Lance</button>
+      <button class="btn btn-primary w-full" onclick="confirmarLance()">Confirmar Lance</button>
       <div id="lance-status" class="mt-sm"></div>
     </div>
   </div>
@@ -50,15 +50,15 @@
 
       document.getElementById('leilao-container').innerHTML = `
         <div class="leilao-header">
-          <span style="font-size:2rem;">${html(l.icone || '📦')}</span>
+          <span class="icon-xl">${html(l.icone || '📦')}</span>
           <h1>${html(l.titulo)}</h1>
           <p>${html(l.descricao || '')}</p>
           <div class="mt-md">
-            <span style="font-size:0.9rem;opacity:0.8;">${html(l.comoditie_nome)} · ${html(l.quantidade)} ${html(l.unidade)}</span>
+            <span class="text-sm opacity-75">${html(l.comoditie_nome)} · ${html(l.quantidade)} ${html(l.unidade)}</span>
           </div>
           <div class="preco-atual">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
           <div class="timer" id="timer">${encerrado ? '🔴 Encerrado' : '⏳ Tempo restante: calculando...'}</div>
-          ${ativo && !encerrado ? `<button class="btn btn-warning btn-lg" onclick="abrirModal()" class="mt-md">💰 Dar Lance</button>` : ''}
+          ${ativo && !encerrado ? `<button class="btn btn-warning btn-lg mt-md" onclick="abrirModal()">💰 Dar Lance</button>` : ''}
         </div>
 
         <div class="leilao-info-grid">
@@ -80,7 +80,7 @@
           </div></div>
         </div>
 
-        <h2 class="page-title" style="margin-bottom:1rem;">📋 Lances</h2>
+        <h2 class="page-title mb-md">📋 Lances</h2>
         ${l.lances && l.lances.length ? `
         <table>
           <thead><tr><th>#</th><th>Usuário</th><th>Valor</th><th>Data</th></tr></thead>

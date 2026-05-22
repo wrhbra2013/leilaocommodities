@@ -4,10 +4,6 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entrar - Leilão Commodities</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    .auth-container { max-width: 400px; margin: 4rem auto; background: var(--color-surface); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-lg); }
-    .auth-container h1 { text-align: center; color: var(--color-primary); margin-bottom: 1.5rem; }
-  </style>
 </head>
 <body>
   <div class="auth-container">
@@ -21,11 +17,11 @@
       <label>Senha</label>
       <input type="password" id="login-senha" class="form-control" placeholder="Sua senha">
     </div>
-    <button class="btn btn-primary" onclick="entrar()" style="width:100%;">Entrar</button>
-    <p class="text-center text-muted" style="margin-top:1rem;">
+    <button class="btn btn-primary w-full" onclick="entrar()">Entrar</button>
+    <p class="text-center text-muted mt-md">
       Não tem conta? <a href="/admin/register.html">Cadastre-se</a>
     </p>
-    <p class="text-center" style="margin-top:0.5rem;">
+    <p class="text-center mt-sm">
       <a href="/">← Voltar ao início</a>
     </p>
   </div>

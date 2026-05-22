@@ -18,8 +18,8 @@
   <div id="header-placeholder"></div>
   <main class="main-content">
     <h1 class="page-title">📈 Cotações do Mercado</h1>
-    <p class="page-subtitle" style="margin-bottom:2rem;">Preços atualizados em tempo real das principais commodities</p>
-    <div id="status-cotacao" class="alert alert-info" style="display:none;"></div>
+    <p class="page-subtitle mb-lg">Preços atualizados em tempo real das principais commodities</p>
+    <div id="status-cotacao" class="alert alert-info d-none"></div>
     <div id="cotacoes-list"></div>
   </main>
   <div id="footer-placeholder"></div>
@@ -46,8 +46,8 @@
               <span>Data: ${cot.data || '--'}</span>
             </div>
             <div class="grafico"></div>
-            <div style="margin-top:1rem;">
-              <a href="/paginas/leiloes.html?comoditie=${c.slug}" class="btn btn-outline btn-sm" style="padding:0.5rem 1rem;">Ver Leilões</a>
+            <div class="mt-md">
+              <a href="/paginas/leiloes.html?comoditie=${c.slug}" class="btn btn-outline btn-sm">Ver Leilões</a>
             </div>
           </div>`;
         }).join('');

@@ -11,7 +11,7 @@
     <h1 class="page-title">🔨 Leilões</h1>
     <p class="page-subtitle">Participe dos leilões e faça seus lances</p>
 
-    <div class="flex-row" style="margin-bottom:1.5rem;">
+    <div class="flex-row mb-lg">
       <select id="filtro-comoditie" class="form-control w-auto min-w-180">
         <option value="">Todas as commodities</option>
       </select>
@@ -50,7 +50,7 @@
         status: document.getElementById('filtro-status').value || undefined,
       });
       if (!r.data || !r.data.length) {
-        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:3rem;" class="text-muted">Nenhum leilão encontrado</p>';
+        grid.innerHTML = '<p class="grid-full text-center text-muted p-xl">Nenhum leilão encontrado</p>';
         return;
       }
       grid.innerHTML = r.data.map(l => {

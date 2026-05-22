@@ -31,7 +31,7 @@
         el.innerHTML = items.map(item => {
           const l = item.leilao || {};
           const lances = [item];
-          return '<div class="card" style="margin-bottom:1rem;" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
+          return '<div class="card mb-md" onclick="location.href=\'/paginas/leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
             '<div class="card-body">' +
             '<div class="flex-between">' +
             '<h3>' + html(l.titulo || 'Leilão') + '</h3>' +

@@ -42,9 +42,9 @@
       <p class="section-subtitle">Os melhores negócios em commodities esperando por você</p>
       <div class="card-grid" id="leiloes-destaque">
         <div class="skeleton-grid-cards" id="skeleton-leiloes">
-          <div class="skeleton-item"><div class="skeleton sk-line wide" style="height:24px;margin-bottom:1rem;"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-line wide" style="height:24px;margin-bottom:1rem;"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
-          <div class="skeleton-item"><div class="skeleton sk-line wide" style="height:24px;margin-bottom:1rem;"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
+          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
+          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
+          <div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>
         </div>
       </div>
     </section>
@@ -145,7 +145,7 @@
         if (type === 'commodity') {
           items.push('<div class="skeleton-item"><div class="skeleton sk-icon"></div><div class="skeleton sk-line wide"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div></div>');
         } else {
-          items.push('<div class="skeleton-item"><div class="skeleton sk-line wide" style="height:24px;margin-bottom:1rem;"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>');
+          items.push('<div class="skeleton-item"><div class="skeleton sk-title"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line narrow"></div><div class="skeleton sk-line wide"></div></div>');
         }
       }
       return items.join('');
@@ -166,12 +166,12 @@
             '<div class="nome">' + html(c.nome) + '</div>' +
             '<div class="preco">R$ ' + (cot.preco ? cot.preco.toFixed(2) : '--') + '</div>' +
             '<div class="variacao ' + varClass + '">' + (cot.variacao || '--') + '</div>' +
-            '<div style="font-size:0.8rem;color:var(--color-text-secondary);">' + html(c.unidade) + '</div>' +
+            '<div class="text-sm text-muted">' + html(c.unidade) + '</div>' +
             '</div>';
         }).join('');
       } catch(e) {
         if (skeleton) skeleton.remove();
-        grid.innerHTML = '<p style="text-align:center;color:var(--color-text-secondary);padding:3rem;">Cotações indisponíveis no momento</p>';
+        grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis no momento</p>';
       }
     }
 
@@ -182,7 +182,7 @@
         const r = await API.listLeiloes({ status: 'ativo', limit: 6 });
         if (skeleton) skeleton.remove();
         if (!r.data || !r.data.length) {
-          grid.innerHTML = '<p style="text-align:center;color:var(--color-text-secondary);padding:3rem;">Nenhum leilão ativo no momento</p>';
+          grid.innerHTML = '<p class="text-center text-muted p-xl">Nenhum leilão ativo no momento</p>';
           return;
         }
         grid.innerHTML = r.data.map(l => {
@@ -200,7 +200,7 @@
         }).join('');
       } catch(e) {
         if (skeleton) skeleton.remove();
-        grid.innerHTML = '<p style="text-align:center;color:var(--color-text-secondary);padding:3rem;">Erro ao carregar leilões</p>';
+        grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';
       }
     }
 

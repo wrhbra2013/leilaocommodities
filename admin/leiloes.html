@@ -8,8 +8,8 @@
 <body>
   <div id="header-placeholder"></div>
   <main class="main-content">
-    <div class="flex-between" style="margin-bottom:1.5rem;">
-      <h1 style="color:var(--color-primary);margin:0;">🔨 Gerenciar Leilões</h1>
+    <div class="flex-between mb-lg">
+      <h1 class="page-title m-0">🔨 Gerenciar Leilões</h1>
       <button class="btn btn-success" onclick="abrirCriar()">+ Novo Leilão</button>
     </div>
     <div id="leiloes-list"><div class="loading">Carregando</div></div>
@@ -51,7 +51,7 @@
         <input type="datetime-local" id="l-data-fim" class="form-control">
       </div>
       <div id="status"></div>
-      <button class="btn btn-success" onclick="salvar()" id="btn-salvar" style="width:100%;">Criar Leilão</button>
+      <button class="btn btn-success w-full" onclick="salvar()" id="btn-salvar">Criar Leilão</button>
     </div>
   </div>
 

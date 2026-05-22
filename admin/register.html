@@ -4,10 +4,6 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro - Leilão Commodities</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    .auth-container { max-width: 400px; margin: 4rem auto; background: var(--color-surface); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-lg); }
-    .auth-container h1 { text-align: center; color: var(--color-primary); margin-bottom: 1.5rem; }
-  </style>
 </head>
 <body>
   <div class="auth-container">
@@ -33,11 +29,11 @@
       <label>Confirmar Senha</label>
       <input type="password" id="reg-senha2" class="form-control" placeholder="Repita a senha">
     </div>
-    <button class="btn btn-success" onclick="cadastrar()" style="width:100%;">Criar Conta</button>
-    <p class="text-center text-muted" style="margin-top:1rem;">
+    <button class="btn btn-success w-full" onclick="cadastrar()">Criar Conta</button>
+    <p class="text-center text-muted mt-md">
       Já tem conta? <a href="/admin/login.html">Entrar</a>
     </p>
-    <p class="text-center" style="margin-top:0.5rem;">
+    <p class="text-center mt-sm">
       <a href="/">← Voltar ao início</a>
     </p>
   </div>
