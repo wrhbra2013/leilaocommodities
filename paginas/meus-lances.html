@@ -15,43 +15,6 @@
     </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="../static/js/api-client.js"></script>
-  <script src="../static/js/helpers.js"></script>
   <script src="../static/js/components.js"></script>
-  <script>
-    async function init() {
-      if (!API.token) { window.location.href = basePath + 'admin/login.html?redirect=' + encodeURIComponent(window.location.pathname); return; }
-      const el = document.getElementById('lances-container');
-      try {
-        const r = await API.meusLances();
-        const items = r.data || [];
-        if (!items.length) {
-          el.innerHTML = '<div class="alert alert-info">Você ainda não deu lances em nenhum leilão. <a href="leiloes.html">Ver leilões ativos</a></div>';
-          return;
-        }
-        el.innerHTML = items.map(item => {
-          const l = item.leilao || {};
-          const lances = [item];
-          return '<div class="card mb-md" onclick="location.href=\'leilao.html?id=' + encodeURIComponent(l.id || item.leilao_id) + '\'">' +
-            '<div class="card-body">' +
-            '<div class="flex-between">' +
-            '<h3>' + html(l.titulo || 'Leilão') + '</h3>' +
-            '<span class="tag ' + (l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado') + '">' + html(l.status || 'desconhecido') + '</span>' +
-            '</div>' +
-            '<div class="meta">' + html(l.comoditie_nome || '') + ' · ' + html(l.quantidade || '') + ' ' + html(l.unidade || '') + '</div>' +
-            '<div class="mt-sm">' +
-            '<strong>Seu lance:</strong> ' +
-            '<span class="bid-badge">R$ ' + parseFloat(item.valor).toFixed(2) + '</span>' +
-            '</div>' +
-            '<div class="mt-sm text-muted text-sm">' + new Date(item.timestamp).toLocaleString('pt-BR') + '</div>' +
-            '</div>' +
-            '</div>';
-        }).join('');
-      } catch(e) {
-        el.innerHTML = '<div class="alert alert-error">Erro ao carregar lances</div>';
-      }
-    }
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
 </body>
 </html>

@@ -23,39 +23,6 @@
     <div id="cotacoes-list"></div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="../static/js/api-client.js"></script>
-  <script src="../static/js/helpers.js"></script>
   <script src="../static/js/components.js"></script>
-  <script>
-    async function init() {
-      const el = document.getElementById('cotacoes-list');
-      el.innerHTML = '<div class="loading">Carregando cotações</div>';
-      try {
-        const [cotacoes, comods] = await Promise.all([API.getCotacoes(), API.getComodities()]);
-        el.innerHTML = comods.map(c => {
-          const cot = cotacoes[c.slug] || {};
-          const varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
-          return `<div class="cotacao-card">
-            <div class="header">
-              <div><span class="nome">${html(c.nome)}</span></div>
-              <span class="tag">${html(c.unidade)}</span>
-            </div>
-            <div class="preco">R$ ${cot.preco ? cot.preco.toFixed(2) : '<span class="text-muted">Indisponível</span>'}</div>
-            <div class="detalhes">
-              <span>Variação: <strong class="${varClass}">${cot.variacao || '--'}</strong></span>
-              <span>Data: ${cot.data || '--'}</span>
-            </div>
-            <div class="grafico"></div>
-            <div class="mt-md">
-              <a href="leiloes.html?comoditie=${c.slug}" class="btn btn-outline btn-sm">Ver Leilões</a>
-            </div>
-          </div>`;
-        }).join('');
-      } catch(e) {
-        el.innerHTML = '<div class="alert alert-error">Erro ao carregar cotações</div>';
-      }
-    }
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
 </body>
 </html>

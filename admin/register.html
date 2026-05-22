@@ -42,29 +42,6 @@
   </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="../static/js/api-client.js"></script>
-  <script src="../static/js/helpers.js"></script>
   <script src="../static/js/components.js"></script>
-  <script>
-    async function cadastrar() {
-      const nome = document.getElementById('reg-nome').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
-      const telefone = document.getElementById('reg-telefone').value.trim();
-      const senha = document.getElementById('reg-senha').value;
-      const senha2 = document.getElementById('reg-senha2').value;
-      if (!nome || !email || !senha) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Preencha todos os campos obrigatórios</div>'; return; }
-      if (senha.length < 6) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Senha deve ter no mínimo 6 caracteres</div>'; return; }
-      if (senha !== senha2) { document.getElementById('register-status').innerHTML = '<div class="alert alert-error">Senhas não conferem</div>'; return; }
-      const r = await API.register(nome, email, telefone, senha);
-      if (r.success) {
-        API.setToken(r.token);
-        localStorage.setItem('lcm_user', JSON.stringify(r.user));
-        document.getElementById('register-status').innerHTML = '<div class="alert alert-success">Conta criada! Redirecionando...</div>';
-        setTimeout(function(){window.location.href = 'index.html';}, 1000);
-      } else {
-        document.getElementById('register-status').innerHTML = '<div class="alert alert-error">' + (r.error || 'Erro ao cadastrar') + '</div>';
-      }
-    }
-  </script>
 </body>
 </html>

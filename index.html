@@ -115,64 +115,6 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="static/js/api-client.js"></script>
-  <script src="static/js/helpers.js"></script>
   <script src="static/js/components.js"></script>
-  <script>
-    function carregarCotacoes() {
-      var grid = document.getElementById('cotacoes-grid');
-      try {
-        API.getCotacoes().then(function(cotacoes) {
-          API.getComodities().then(function(comods) {
-            grid.innerHTML = comods.map(function(c) {
-              var cot = cotacoes[c.slug] || {};
-              var varClass = cot.variacao && cot.variacao.startsWith('+') ? 'positiva' : 'negativa';
-              return '<div class="commodity-card" onclick="location.href=\'' + basePath + 'paginas/comodities.html?slug=' + encodeURIComponent(c.slug) + '\'">' +
-                '' +
-                '<div class="nome">' + html(c.nome) + '</div>' +
-                '<div class="preco">R$ ' + (cot.preco ? cot.preco.toFixed(2) : '--') + '</div>' +
-                '<div class="variacao ' + varClass + '">' + (cot.variacao || '--') + '</div>' +
-                '<div class="text-sm text-muted">' + html(c.unidade) + '</div>' +
-                '</div>';
-            }).join('');
-          }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';});
-        }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';});
-      } catch(e) {
-        grid.innerHTML = '<p class="text-center text-muted p-xl">Cotações indisponíveis</p>';
-      }
-    }
-
-    function carregarLeiloes() {
-      var grid = document.getElementById('leiloes-destaque');
-      try {
-        API.listLeiloes({ status: 'ativo', limit: 6 }).then(function(r) {
-          if (!r.data || !r.data.length) {
-            grid.innerHTML = '<p class="text-center text-muted p-xl">Nenhum leilão ativo</p>';
-            return;
-          }
-          grid.innerHTML = r.data.map(function(l) {
-            var tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
-            return '<div class="card" onclick="location.href=\'' + basePath + 'paginas/leilao.html?id=' + encodeURIComponent(l.id) + '\'">' +
-              '<div class="card-body">' +
-              '' +
-              '<h3>' + html(l.titulo) + '</h3>' +
-              '<div class="tag ' + tagCls + '">' + (l.status === 'ativo' ? 'Ativo' : 'Encerrado') + '</div>' +
-              '<div class="preco">R$ ' + parseFloat(l.preco_atual).toFixed(2) + '</div>' +
-              '<div class="meta">' + html(l.comoditie_nome) + ' · ' + html(l.quantidade) + ' ' + html(l.unidade) + '</div>' +
-              '<div class="meta">' + (l.total_lances || 0) + ' lance(s)</div>' +
-              '</div>' +
-              '</div>';
-          }).join('');
-        }).catch(function(){grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';});
-      } catch(e) {
-        grid.innerHTML = '<p class="text-center text-muted p-xl">Erro ao carregar leilões</p>';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      carregarCotacoes();
-      carregarLeiloes();
-    });
-  </script>
 </body>
 </html>

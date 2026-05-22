@@ -29,47 +29,6 @@
     </div>
   </main>
   <div id="footer-placeholder"></div>
-  <script src="../static/js/api-client.js"></script>
-  <script src="../static/js/helpers.js"></script>
   <script src="../static/js/components.js"></script>
-  <script>
-    let comods = [];
-
-    async function init() {
-      comods = await API.getComodities();
-      const sel = document.getElementById('filtro-comoditie');
-      sel.innerHTML = '<option value="">Todas as commodities</option>' +
-        comods.map(c => '<option value="' + html(c.id) + '">' + html(c.nome) + '</option>').join('');
-      filtrar();
-    }
-
-    async function filtrar() {
-      const grid = document.getElementById('lista-leiloes');
-      grid.innerHTML = '<div class="loading">Carregando</div>';
-      const r = await API.listLeiloes({
-        comoditie_id: document.getElementById('filtro-comoditie').value || undefined,
-        status: document.getElementById('filtro-status').value || undefined,
-      });
-      if (!r.data || !r.data.length) {
-        grid.innerHTML = '<p class="grid-full text-center text-muted p-xl">Nenhum leilão encontrado</p>';
-        return;
-      }
-      grid.innerHTML = r.data.map(l => {
-        const tagCls = l.status === 'ativo' ? 'tag-ativo' : 'tag-encerrado';
-        return `<div class="card" onclick="location.href='leilao.html?id=${encodeURIComponent(l.id)}'">
-          <div class="card-body">
-
-            <h3>${html(l.titulo)}</h3>
-            <div class="tag ${tagCls}">${l.status === 'ativo' ? 'Ativo' : 'Encerrado'}</div>
-            <div class="preco">R$ ${parseFloat(l.preco_atual).toFixed(2)}</div>
-            <div class="meta">${html(l.comoditie_nome)} · ${html(l.quantidade)} ${html(l.unidade)}</div>
-            <div class="meta">${l.total_lances || 0} lance(s)</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
 </body>
 </html>
