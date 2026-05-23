@@ -4,10 +4,14 @@ set -euo pipefail
 # ==============================================================
 # Script de instalação — Leilão Commodities API
 # Uso: sudo bash install.sh
-# - Cria estrutura em /var/www/leilaocommodities/
-# - API Node.js com CRUD PostgreSQL na porta 3002
-# - Configura Nginx (location /api/ -> localhost:3002)
-# - PM2 ecosystem.config.js
+#
+# API REST de persistência de dados via PostgreSQL.
+# Projetado para servir páginas estáticas hospedadas em
+# qualquer servidor (configurável via CORS).
+#
+# URL final:  https://api.projetosdinamicos.com.br/leilaocommodities/(crud)
+# Proxy:      /leilaocommodities/ -> localhost:3002/api/
+# Porta app:  3002
 # ==============================================================
 
 INSTALL_DIR="/var/www/leilaocommodities"
@@ -18,30 +22,21 @@ MIDDLEWARE_DIR="$SRC_DIR/middleware"
 NGINX_AVAILABLE="/etc/nginx/sites-available"
 NGINX_CONF="$NGINX_AVAILABLE/default"
 
-# Cores para output
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERRO]${NC} $1"; exit 1; }
 
-# --------------------------------------------------------------
-# 0. Verificações
-# --------------------------------------------------------------
 [[ $EUID -eq 0 ]] || error "Execute como root: sudo bash install.sh"
-
 command -v node  >/dev/null 2>&1 || error "Node.js não encontrado"
 command -v npm   >/dev/null 2>&1 || error "npm não encontrado"
 command -v psql  >/dev/null 2>&1 || warn "psql não encontrado — PostgreSQL pode não estar instalado"
 command -v pm2   >/dev/null 2>&1 || warn "pm2 não encontrado — será instalado via npm"
 
-# --------------------------------------------------------------
-# 1. Criar estrutura de diretórios
-# --------------------------------------------------------------
-info "Criando diretórios em $INSTALL_DIR"
 mkdir -p "$ROUTES_DIR" "$MIDDLEWARE_DIR"
 
 # --------------------------------------------------------------
-# 2. Criar .env
+# .env
 # --------------------------------------------------------------
 info "Criando .env"
 cat > "$API_DIR/.env" <<'ENVEOF'
@@ -53,12 +48,13 @@ DB_USER=leilaoadmin
 DB_PASS=suasenhaaqui
 JWT_SECRET=troque_por_uma_chave_segura_32chars
 JWT_EXPIRES_IN=7d
+CORS_ORIGIN=*           # ex: https://pages.projetosdinamicos.com.br
 ENVEOF
 
 chmod 600 "$API_DIR/.env"
 
 # --------------------------------------------------------------
-# 3. Criar package.json
+# package.json
 # --------------------------------------------------------------
 info "Criando package.json"
 cat > "$API_DIR/package.json" <<'JSONEOF'
@@ -83,7 +79,7 @@ cat > "$API_DIR/package.json" <<'JSONEOF'
 JSONEOF
 
 # --------------------------------------------------------------
-# 4. Criar database.js (conexão PostgreSQL)
+# src/database.js
 # --------------------------------------------------------------
 info "Criando src/database.js"
 cat > "$SRC_DIR/database.js" <<'DBEOF'
@@ -112,7 +108,7 @@ module.exports = {
 DBEOF
 
 # --------------------------------------------------------------
-# 5. Criar migrate.js (schema + seed)
+# src/migrate.js
 # --------------------------------------------------------------
 info "Criando src/migrate.js"
 cat > "$SRC_DIR/migrate.js" <<'MGEOF'
@@ -177,7 +173,7 @@ async function migrate() {
   `);
   console.log('  OK  lances');
 
-  // Seed comodities
+  // seed comodities
   const { rowCount } = await query('SELECT COUNT(*) FROM comodities');
   if (parseInt(rowCount) === 0) {
     const seed = [
@@ -199,7 +195,7 @@ async function migrate() {
     console.log('  OK  comodities seed (8 registros)');
   }
 
-  // Seed admin user
+  // seed admin
   const { rowCount: userCount } = await query('SELECT COUNT(*) FROM usuarios');
   if (parseInt(userCount) === 0) {
     const bcrypt = require('bcryptjs');
@@ -222,7 +218,7 @@ migrate().catch((err) => {
 MGEOF
 
 # --------------------------------------------------------------
-# 6. Criar middleware/auth.js
+# src/middleware/auth.js
 # --------------------------------------------------------------
 info "Criando src/middleware/auth.js"
 cat > "$MIDDLEWARE_DIR/auth.js" <<'AUTHEOF'
@@ -262,12 +258,12 @@ module.exports = { gerarToken, autenticar, adminOnly };
 AUTHEOF
 
 # --------------------------------------------------------------
-# 7. Criar rotas
+# routes/
 # --------------------------------------------------------------
 
-# 7a. auth.js
+# auth.js
 info "Criando routes/auth.js"
-cat > "$ROUTES_DIR/auth.js" <<'AUTHEOF'
+cat > "$ROUTES_DIR/auth.js" <<'RTAEOF'
 const { Router } = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../database');
@@ -292,7 +288,7 @@ router.post('/register', async (req, res) => {
     const token = gerarToken(usuario);
     res.status(201).json({ usuario, token });
   } catch (err) {
-    console.error('Erro register:', err);
+    console.error(err);
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 });
@@ -313,17 +309,17 @@ router.post('/login', async (req, res) => {
     delete usuario.senha;
     res.json({ usuario, token });
   } catch (err) {
-    console.error('Erro login:', err);
+    console.error(err);
     res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 });
 
 module.exports = router;
-AUTHEOF
+RTAEOF
 
-# 7b. usuarios.js
+# usuarios.js
 info "Criando routes/usuarios.js"
-cat > "$ROUTES_DIR/usuarios.js" <<'USRSEOF'
+cat > "$ROUTES_DIR/usuarios.js" <<'USREOF'
 const { Router } = require('express');
 const db = require('../database');
 const { autenticar, adminOnly } = require('../middleware/auth');
@@ -372,11 +368,11 @@ router.delete('/:id', autenticar, adminOnly, async (req, res) => {
 });
 
 module.exports = router;
-USRSEOF
+USREOF
 
-# 7c. comodities.js
+# comodities.js
 info "Criando routes/comodities.js"
-cat > "$ROUTES_DIR/comodities.js" <<'CMDFEOF'
+cat > "$ROUTES_DIR/comodities.js" <<'CMDEOF'
 const { Router } = require('express');
 const db = require('../database');
 const { autenticar, adminOnly } = require('../middleware/auth');
@@ -410,11 +406,11 @@ router.put('/:id/preco', autenticar, adminOnly, async (req, res) => {
 });
 
 module.exports = router;
-CMDFEOF
+CMDEOF
 
-# 7d. leiloes.js
+# leiloes.js
 info "Criando routes/leiloes.js"
-cat > "$ROUTES_DIR/leiloes.js" <<'LEILEOF'
+cat > "$ROUTES_DIR/leiloes.js" <<'LLEOT'
 const { Router } = require('express');
 const db = require('../database');
 const { autenticar, adminOnly } = require('../middleware/auth');
@@ -456,7 +452,7 @@ router.get('/:id', async (req, res) => {
       WHERE l.id = $1`, [id]
     );
     if (!rows.length) return res.status(404).json({ erro: 'Leilão não encontrado' });
-    // busca lances do leilão
+
     const lances = await db.query(
       `SELECT l.*, u.nome AS usuario_nome
        FROM lances l JOIN usuarios u ON u.id = l.usuario_id
@@ -518,11 +514,11 @@ router.delete('/:id', autenticar, adminOnly, async (req, res) => {
 });
 
 module.exports = router;
-LEILEOF
+LLEOT
 
-# 7e. lances.js
+# lances.js
 info "Criando routes/lances.js"
-cat > "$ROUTES_DIR/lances.js" <<'LANCESEOF'
+cat > "$ROUTES_DIR/lances.js" <<'LANCT'
 const { Router } = require('express');
 const db = require('../database');
 const { autenticar } = require('../middleware/auth');
@@ -582,9 +578,9 @@ router.post('/', autenticar, async (req, res) => {
 });
 
 module.exports = router;
-LANCESEOF
+LANCT
 
-# 7f. dashboard.js
+# dashboard.js
 info "Criando routes/dashboard.js"
 cat > "$ROUTES_DIR/dashboard.js" <<'DSHEOF'
 const { Router } = require('express');
@@ -623,21 +619,28 @@ module.exports = router;
 DSHEOF
 
 # --------------------------------------------------------------
-# 8. Criar server.js (entrypoint)
+# src/server.js
 # --------------------------------------------------------------
 info "Criando src/server.js"
 cat > "$SRC_DIR/server.js" <<'SVREOF'
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-app.use(cors());
+// CORS — permite requisições de origens externas
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
 app.use(express.json());
 
-// Rotas
 app.use('/api/auth',       require('./routes/auth'));
 app.use('/api/usuarios',   require('./routes/usuarios'));
 app.use('/api/comodities', require('./routes/comodities'));
@@ -645,13 +648,10 @@ app.use('/api/leiloes',    require('./routes/leiloes'));
 app.use('/api/lances',     require('./routes/lances'));
 app.use('/api/dashboard',  require('./routes/dashboard'));
 
-// Health check
 app.get('/api/ping', (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
-// 404
 app.use((_req, res) => res.status(404).json({ erro: 'Rota não encontrada' }));
 
-// Error handler
 app.use((err, _req, res, _next) => {
   console.error('Erro não tratado:', err);
   res.status(500).json({ erro: 'Erro interno do servidor' });
@@ -663,352 +663,7 @@ app.listen(PORT, () => {
 SVREOF
 
 # --------------------------------------------------------------
-# 9. Criar static/js/api.js (frontend API client)
-# --------------------------------------------------------------
-info "Criando static/js/api.js"
-cat > "$INSTALL_DIR/static/js/api.js" <<'APIEOF'
-// --------------------------------------------------------------
-// Cliente API — Leilão Commodities
-// --------------------------------------------------------------
-var API_BASE = '/api';
-
-function getToken() { return localStorage.getItem('token'); }
-function setToken(t) { localStorage.setItem('token', t); }
-function clearToken() { localStorage.removeItem('token'); localStorage.removeItem('usuario'); }
-function getUsuario() { return JSON.parse(localStorage.getItem('usuario') || 'null'); }
-function setUsuario(u) { localStorage.setItem('usuario', JSON.stringify(u)); }
-
-function api(method, path, body) {
-  var opts = {
-    method: method,
-    headers: { 'Content-Type': 'application/json' },
-  };
-  var token = getToken();
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-  if (body && method !== 'GET') opts.body = JSON.stringify(body);
-  return fetch(API_BASE + path, opts).then(function (r) {
-    if (!r.ok) return r.json().then(function (e) { throw e; });
-    return r.json();
-  });
-}
-
-// ==================== AUTH ====================
-function cadastrar() {
-  var nome = document.getElementById('reg-nome');
-  var email = document.getElementById('reg-email');
-  var telefone = document.getElementById('reg-telefone');
-  var senha = document.getElementById('reg-senha');
-  var senha2 = document.getElementById('reg-senha2');
-  var status = document.getElementById('register-status');
-  if (!nome || !email || !senha || !senha2) return;
-  if (senha.value !== senha2.value) { status.innerHTML = '<div class="alert alert-error">Senhas não conferem</div>'; return; }
-  api('POST', '/auth/register', { nome: nome.value, email: email.value, telefone: telefone.value, senha: senha.value })
-    .then(function (r) { setToken(r.token); setUsuario(r.usuario); window.location.href = 'index.html'; })
-    .catch(function (e) { status.innerHTML = '<div class="alert alert-error">' + (e.erro || 'Erro ao cadastrar') + '</div>'; });
-}
-
-function entrar() {
-  var email = document.getElementById('login-email');
-  var senha = document.getElementById('login-senha');
-  var status = document.getElementById('login-status');
-  if (!email || !senha) return;
-  api('POST', '/auth/login', { email: email.value, senha: senha.value })
-    .then(function (r) { setToken(r.token); setUsuario(r.usuario); window.location.href = 'index.html'; })
-    .catch(function (e) { status.innerHTML = '<div class="alert alert-error">' + (e.erro || 'Erro ao entrar') + '</div>'; });
-}
-
-function sair() { clearToken(); window.location.href = '../index.html'; }
-function isAdmin() { var u = getUsuario(); return u && u.admin; }
-
-// ==================== COMODITIES ====================
-function carregarCotacoes() {
-  var grid = document.getElementById('cotacoes-grid') || document.getElementById('cotacoes-list');
-  if (!grid) return;
-  grid.innerHTML = '<div class="loading">Carregando cotações...</div>';
-  api('GET', '/comodities').then(function (dados) {
-    grid.innerHTML = dados.map(function (c) { return (
-      '<div class="cotacao-card">' +
-        '<div class="header"><span class="nome">' + c.nome + ' <small>(' + c.sigla + ')</small></span>' +
-        '<span class="variacao ' + (c.variacao >= 0 ? 'text-success' : 'text-danger') + '">' + (c.variacao >= 0 ? '+' : '') + c.variacao + '%</span></div>' +
-        '<div class="preco">R$ ' + parseFloat(c.preco).toFixed(2) + '</div>' +
-        '<div class="detalhes"><span>Atualizado: ' + new Date(c.updated_at).toLocaleString('pt-BR') + '</span></div>' +
-      '</div>'
-    ); }).join('');
-  }).catch(function () { grid.innerHTML = '<div class="alert alert-error">Erro ao carregar cotações</div>'; });
-}
-
-// ==================== LEILOES ====================
-function carregarLeiloes() {
-  var lista = document.getElementById('lista-leiloes');
-  if (!lista) return;
-  lista.innerHTML = '<div class="loading">Carregando leilões...</div>';
-  var params = '';
-  var filtroC = document.getElementById('filtro-comoditie');
-  var filtroS = document.getElementById('filtro-status');
-  if (filtroC && filtroC.value) params += '&comoditie=' + filtroC.value;
-  if (filtroS && filtroS.value) params += '&status=' + filtroS.value;
-  api('GET', '/leiloes?' + params.slice(1)).then(function (dados) {
-    if (!dados.length) { lista.innerHTML = '<p class="text-muted">Nenhum leilão encontrado</p>'; return; }
-    lista.innerHTML = dados.map(function (l) {
-      var encerrado = l.status !== 'ativo' || new Date(l.data_fim) < new Date();
-      return (
-        '<div class="card-leilao ' + (encerrado ? 'encerrado' : '') + '">' +
-          '<div class="card-header">' +
-            '<span class="tag">' + (l.comoditie_sigla || '') + '</span>' +
-            '<span class="status ' + l.status + '">' + (encerrado ? 'Encerrado' : l.status) + '</span>' +
-          '</div>' +
-          '<h3>' + l.titulo + '</h3>' +
-          '<p class="desc">' + (l.descricao || '') + '</p>' +
-          '<div class="info-grid">' +
-            '<div><small>Preço atual</small><strong>R$ ' + parseFloat(l.maior_lance || l.preco_inicial).toFixed(2) + '</strong></div>' +
-            '<div><small>Lances</small><strong>' + l.total_lances + '</strong></div>' +
-            '<div><small>Quantidade</small><strong>' + l.quantidade + '</strong></div>' +
-            '<div><small>Término</small><strong>' + new Date(l.data_fim).toLocaleString('pt-BR') + '</strong></div>' +
-          '</div>' +
-          '<a href="leilao.html?id=' + l.id + '" class="btn btn-primary btn-sm">Ver Leilão</a>' +
-        '</div>'
-      );
-    }).join('');
-  }).catch(function () { lista.innerHTML = '<div class="alert alert-error">Erro ao carregar leilões</div>'; });
-}
-
-function carregarLeilao() {
-  var container = document.getElementById('leilao-container');
-  if (!container) return;
-  var params = new URLSearchParams(window.location.search);
-  var id = params.get('id');
-  if (!id) { container.innerHTML = '<p class="alert alert-error">Leilão não informado</p>'; return; }
-  container.innerHTML = '<div class="loading">Carregando leilão...</div>';
-  api('GET', '/leiloes/' + id).then(function (dados) {
-    var encerrado = dados.status !== 'ativo' || new Date(dados.data_fim) < new Date();
-    var html =
-      '<h1>' + dados.titulo + '</h1>' +
-      '<p>' + (dados.descricao || '') + '</p>' +
-      '<div class="info-grid">' +
-        '<div><small>Commoditie</small><strong>' + dados.comoditie_nome + ' (' + dados.comoditie_sigla + ')</strong></div>' +
-        '<div><small>Preço atual</small><strong>R$ ' + parseFloat(dados.maior_lance || dados.preco_inicial).toFixed(2) + '</strong></div>' +
-        '<div><small>Lances</small><strong>' + dados.total_lances + '</strong></div>' +
-        '<div><small>Quantidade</small><strong>' + dados.quantidade + '</strong></div>' +
-        '<div><small>Valor mínimo lance</small><strong>' + (dados.valor_min_lance ? 'R$ ' + parseFloat(dados.valor_min_lance).toFixed(2) : '—') + '</strong></div>' +
-        '<div><small>Término</small><strong>' + new Date(dados.data_fim).toLocaleString('pt-BR') + '</strong></div>' +
-        '<div><small>Status</small><strong class="status-' + dados.status + '">' + (encerrado ? 'Encerrado' : dados.status) + '</strong></div>' +
-      '</div>';
-    if (!encerrado && getToken()) {
-      html += '<button class="btn btn-primary" onclick="abrirModalLance()">Dar Lance</button>';
-    }
-    if (dados.lances && dados.lances.length) {
-      html += '<h2 class="mt-lg">Histórico de Lances</h2><table class="table"><thead><tr><th>Usuário</th><th>Valor</th><th>Data</th></tr></thead><tbody>';
-      dados.lances.forEach(function (l) {
-        html += '<tr><td>' + (l.usuario_nome || '—') + '</td><td>R$ ' + parseFloat(l.valor).toFixed(2) + '</td><td>' + new Date(l.created_at).toLocaleString('pt-BR') + '</td></tr>';
-      });
-      html += '</tbody></table>';
-    } else {
-      html += '<p class="text-muted mt-lg">Nenhum lance ainda. Seja o primeiro!</p>';
-    }
-    container.innerHTML = html;
-    window.dadosLeilao = dados;
-    if (document.getElementById('modal-lance')) {
-      document.getElementById('lance-valor').min = (parseFloat(dados.maior_lance || dados.preco_inicial) + 0.01);
-    }
-  }).catch(function () { container.innerHTML = '<div class="alert alert-error">Erro ao carregar leilão</div>'; });
-}
-
-var dadosLeilao = null;
-
-function abrirModalLance() {
-  var modal = document.getElementById('modal-lance');
-  if (modal) modal.style.display = 'flex';
-}
-
-function fecharModal() {
-  var modal = document.getElementById('modal-lance');
-  if (modal) modal.style.display = 'none';
-}
-
-function confirmarLance() {
-  var input = document.getElementById('lance-valor');
-  var status = document.getElementById('lance-status');
-  if (!input || !status || !dadosLeilao) return;
-  api('POST', '/lances', { leilao_id: dadosLeilao.id, valor: parseFloat(input.value) })
-    .then(function () { status.innerHTML = '<div class="alert alert-success">Lance registrado!</div>'; setTimeout(function () { fecharModal(); carregarLeilao(); }, 1000); })
-    .catch(function (e) { status.innerHTML = '<div class="alert alert-error">' + (e.erro || 'Erro ao dar lance') + '</div>'; });
-}
-
-function filtrar() { carregarLeiloes(); }
-
-// ==================== ADMIN ====================
-function carregarLeiloesAdmin() {
-  var lista = document.getElementById('leiloes-list') || document.getElementById('admin-leiloes');
-  if (!lista) return;
-  var ehAdmin = lista.id === 'admin-leiloes';
-  lista.innerHTML = '<div class="loading">Carregando...</div>';
-  api('GET', '/leiloes').then(function (dados) {
-    if (!dados.length) { lista.innerHTML = '<p class="text-muted">Nenhum leilão encontrado</p>'; return; }
-    lista.innerHTML = dados.map(function (l) {
-      return (
-        '<div class="card-leilao">' +
-          '<div class="card-header">' +
-            '<span class="tag">' + (l.comoditie_sigla || '') + '</span>' +
-            '<span class="status ' + l.status + '">' + l.status + '</span>' +
-          '</div>' +
-          '<h3>' + l.titulo + '</h3>' +
-          '<div class="info-grid">' +
-            '<div><small>Preço</small><strong>R$ ' + parseFloat(l.preco_inicial).toFixed(2) + '</strong></div>' +
-            '<div><small>Lances</small><strong>' + l.total_lances + '</strong></div>' +
-            '<div><small>Término</small><strong>' + new Date(l.data_fim).toLocaleString('pt-BR') + '</strong></div>' +
-          '</div>' +
-          (ehAdmin ? '<div class="card-actions"><button class="btn btn-outline btn-sm" onclick="editarLeilao(' + l.id + ')">Editar</button><button class="btn btn-danger btn-sm" onclick="removerLeilao(' + l.id + ')">Remover</button></div>' : '') +
-        '</div>'
-      );
-    }).join('');
-  }).catch(function () { lista.innerHTML = '<div class="alert alert-error">Erro ao carregar</div>'; });
-}
-
-function abrirCriar() {
-  var modal = document.getElementById('modal-leilao');
-  if (!modal) return;
-  document.getElementById('modal-title').textContent = 'Novo Leilão';
-  ['l-titulo','l-descricao','l-comoditie','l-quantidade','l-preco','l-min-lance','l-data-fim'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('btn-salvar').dataset.id = '';
-  carregarComboComodities();
-  modal.style.display = 'flex';
-}
-
-function editarLeilao(id) {
-  api('GET', '/leiloes/' + id).then(function (l) {
-    var modal = document.getElementById('modal-leilao');
-    if (!modal) return;
-    document.getElementById('modal-title').textContent = 'Editar Leilão';
-    document.getElementById('l-titulo').value = l.titulo || '';
-    document.getElementById('l-descricao').value = l.descricao || '';
-    document.getElementById('l-quantidade').value = l.quantidade || 1;
-    document.getElementById('l-preco').value = l.preco_inicial || '';
-    document.getElementById('l-min-lance').value = l.valor_min_lance || '';
-    document.getElementById('l-data-fim').value = l.data_fim ? l.data_fim.slice(0,16) : '';
-    document.getElementById('btn-salvar').dataset.id = l.id;
-    carregarComboComodities(l.comoditie_id);
-    modal.style.display = 'flex';
-  }).catch(function () { alert('Erro ao carregar leilão'); });
-}
-
-function fechar() {
-  var modal = document.getElementById('modal-leilao');
-  if (modal) modal.style.display = 'none';
-}
-
-function salvar() {
-  var id = document.getElementById('btn-salvar').dataset.id;
-  var status = document.getElementById('status');
-  var dados = {
-    titulo: document.getElementById('l-titulo').value,
-    descricao: document.getElementById('l-descricao').value,
-    comoditie_id: parseInt(document.getElementById('l-comoditie').value),
-    quantidade: parseFloat(document.getElementById('l-quantidade').value) || 1,
-    preco_inicial: parseFloat(document.getElementById('l-preco').value),
-    valor_min_lance: parseFloat(document.getElementById('l-min-lance').value) || null,
-    data_fim: document.getElementById('l-data-fim').value,
-  };
-  if (!dados.titulo || !dados.comoditie_id || !dados.preco_inicial || !dados.data_fim) {
-    if (status) status.innerHTML = '<div class="alert alert-error">Preencha todos os campos obrigatórios</div>'; return;
-  }
-  var req = id ? api('PUT', '/leiloes/' + id, dados) : api('POST', '/leiloes', dados);
-  req.then(function () {
-    if (status) status.innerHTML = '<div class="alert alert-success">Leilão salvo!</div>';
-    setTimeout(function () { fechar(); carregarLeiloesAdmin(); }, 800);
-  }).catch(function (e) {
-    if (status) status.innerHTML = '<div class="alert alert-error">' + (e.erro || 'Erro ao salvar') + '</div>';
-  });
-}
-
-function removerLeilao(id) {
-  if (!confirm('Remover este leilão e todos os lances?')) return;
-  api('DELETE', '/leiloes/' + id).then(function () { carregarLeiloesAdmin(); }).catch(function (e) { alert(e.erro || 'Erro ao remover'); });
-}
-
-function carregarComboComodities(selected) {
-  var sel = document.getElementById('l-comoditie');
-  if (!sel) return;
-  api('GET', '/comodities').then(function (dados) {
-    sel.innerHTML = dados.map(function (c) {
-      return '<option value="' + c.id + '"' + (c.id === selected ? ' selected' : '') + '>' + c.nome + '</option>';
-    }).join('');
-  });
-}
-
-// ==================== USUARIOS (admin) ====================
-function carregarUsuarios() {
-  var lista = document.getElementById('usuarios-list');
-  if (!lista) return;
-  lista.innerHTML = '<div class="loading">Carregando...</div>';
-  api('GET', '/usuarios').then(function (dados) {
-    if (!dados.length) { lista.innerHTML = '<p class="text-muted">Nenhum usuário</p>'; return; }
-    lista.innerHTML = '<table class="table"><thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Admin</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody>' +
-      dados.map(function (u) {
-        return '<tr><td>' + u.nome + '</td><td>' + u.email + '</td><td>' + (u.telefone || '—') + '</td><td>' + (u.admin ? 'Sim' : 'Não') + '</td><td>' + new Date(u.created_at).toLocaleDateString('pt-BR') + '</td>' +
-          '<td><button class="btn btn-danger btn-sm" onclick="removerUsuario(' + u.id + ')">Remover</button></td></tr>';
-      }).join('') + '</tbody></table>';
-  }).catch(function () { lista.innerHTML = '<div class="alert alert-error">Erro ao carregar</div>'; });
-}
-
-function removerUsuario(id) {
-  if (!confirm('Remover este usuário?')) return;
-  api('DELETE', '/usuarios/' + id).then(function () { carregarUsuarios(); }).catch(function (e) { alert(e.erro || 'Erro ao remover'); });
-}
-
-// ==================== LANCES ====================
-function carregarMeusLances() {
-  var container = document.getElementById('lances-container');
-  if (!container) return;
-  container.innerHTML = '<div class="loading">Carregando...</div>';
-  api('GET', '/lances/meus').then(function (dados) {
-    if (!dados.length) { container.innerHTML = '<p class="text-muted">Você ainda não deu lances</p>'; return; }
-    container.innerHTML = '<table class="table"><thead><tr><th>Leilão</th><th>Commoditie</th><th>Valor</th><th>Data</th></tr></thead><tbody>' +
-      dados.map(function (l) {
-        return '<tr><td>' + l.leilao_titulo + '</td><td>' + l.comoditie_nome + '</td><td>R$ ' + parseFloat(l.valor).toFixed(2) + '</td><td>' + new Date(l.created_at).toLocaleString('pt-BR') + '</td></tr>';
-      }).join('') + '</tbody></table>';
-  }).catch(function () { container.innerHTML = '<div class="alert alert-error">Erro ao carregar lances</div>'; });
-}
-
-// ==================== DASHBOARD ====================
-function carregarDashboard() {
-  var stats = document.getElementById('stats');
-  if (!stats) return;
-  stats.innerHTML = '<div class="loading">Carregando...</div>';
-  api('GET', '/dashboard').then(function (d) {
-    stats.innerHTML =
-      '<div class="stat-card"><h3>' + d.usuarios + '</h3><p>Usuários</p></div>' +
-      '<div class="stat-card"><h3>' + d.leiloes_ativos + '</h3><p>Leilões Ativos</p></div>' +
-      '<div class="stat-card"><h3>' + d.total_lances + '</h3><p>Total de Lances</p></div>' +
-      '<div class="stat-card"><h3>' + d.comodities + '</h3><p>Commodities</p></div>';
-  }).catch(function () { stats.innerHTML = '<div class="alert alert-error">Erro ao carregar dashboard</div>'; });
-  carregarLeiloesAdmin();
-}
-
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', function () {
-  // Auto-init baseado na página
-  if (document.getElementById('cotacoes-grid') || document.getElementById('cotacoes-list')) carregarCotacoes();
-  if (document.getElementById('lista-leiloes')) carregarLeiloes();
-  if (document.getElementById('leilao-container')) carregarLeilao();
-  if (document.getElementById('lances-container')) carregarMeusLances();
-  if (document.getElementById('stats')) carregarDashboard();
-  if (document.getElementById('admin-leiloes')) carregarLeiloesAdmin();
-  if (document.getElementById('leiloes-list')) carregarLeiloesAdmin();
-  if (document.getElementById('usuarios-list')) carregarUsuarios();
-  if (document.getElementById('filtro-comoditie')) {
-    api('GET', '/comodities').then(function (dados) {
-      var sel = document.getElementById('filtro-comoditie');
-      if (sel) dados.forEach(function (c) { sel.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>'; });
-    });
-  }
-});
-APIEOF
-
-# --------------------------------------------------------------
-# 10. Criar ecosystem.config.js (PM2)
+# ecosystem.config.js (PM2)
 # --------------------------------------------------------------
 info "Criando ecosystem.config.js"
 cat > "$INSTALL_DIR/ecosystem.config.js" <<'PM2EOF'
@@ -1029,23 +684,19 @@ module.exports = {
 PM2EOF
 
 # --------------------------------------------------------------
-# 13. Configurar Nginx
+# Nginx — insere location /api/ -> localhost:3002
 # --------------------------------------------------------------
 info "Configurando Nginx — adicionando location /api/"
 
 if [ -f "$NGINX_CONF" ]; then
-  # Verifica se o bloco leilaocommodities já existe
-  if grep -q 'leilaocommodities' "$NGINX_CONF"; then
+  if grep -q '# leilaocommodities' "$NGINX_CONF"; then
     warn "Bloco leilaocommodities já encontrado em $NGINX_CONF — pulando"
   else
-    # Insere antes do último '}'
     sed -i '$i\
 \
-    # --------------------------------------------\
-    # Leilao Commodities API (porta 3002)\
-    # --------------------------------------------\
-    location /api/ {\
-        proxy_pass http://localhost:3002;\
+    # leilaocommodities — https://api.projetosdinamicos.com.br/leilaocommodities/\
+    location /leilaocommodities/ {\
+        proxy_pass http://localhost:3002/api/;\
         proxy_http_version 1.1;\
         proxy_set_header Upgrade $http_upgrade;\
         proxy_set_header Connection "upgrade";\
@@ -1057,7 +708,7 @@ if [ -f "$NGINX_CONF" ]; then
         proxy_send_timeout 120s;\
     }\
 ' "$NGINX_CONF"
-    info "Bloco /api/ inserido em $NGINX_CONF"
+    info "Location /leilaocommodities/ inserido em $NGINX_CONF"
   fi
 else
   warn "$NGINX_CONF não encontrado — criando arquivo"
@@ -1065,14 +716,11 @@ else
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name _;
+    server_name api.projetosdinamicos.com.br;
 
-    root /var/www/html;
-    index index.html;
-
-    # Leilao Commodities API
-    location /api/ {
-        proxy_pass http://localhost:3002;
+    # leilaocommodities
+    location /leilaocommodities/ {
+        proxy_pass http://localhost:3002/api/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -1083,41 +731,25 @@ server {
         proxy_read_timeout 120s;
         proxy_send_timeout 120s;
     }
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
 }
 NGINXEOF
-  info "Arquivo $NGINX_CONF criado"
+  info "Arquivo $NGINX_CONF criado (server_name api.projetosdinamicos.com.br)"
 fi
 
 # --------------------------------------------------------------
-# 11. Adicionar script api.js nas páginas HTML
-# --------------------------------------------------------------
-info "Injetando script api.js nas páginas HTML"
-find "$INSTALL_DIR" -name '*.html' -type f | while read -r html; do
-  # Insere api.js antes do ultimo </body> ou antes de </html>
-  if grep -q 'components.js' "$html" && ! grep -q 'api.js' "$html"; then
-    sed -i 's|<script src="\(.*\)components.js"></script>|<script src="\1components.js"></script>\n  <script src="\1api.js"></script>|' "$html"
-    echo "    + $html"
-  fi
-done
-
-# --------------------------------------------------------------
-# 12. Instalar dependências npm
+# Instalar dependências
 # --------------------------------------------------------------
 info "Instalando dependências npm em $API_DIR"
 npm install --prefix "$API_DIR" --production
 
 # --------------------------------------------------------------
-# 14. Migração do banco PostgreSQL
+# Migração PostgreSQL
 # --------------------------------------------------------------
 info "Executando migração do banco de dados"
 node "$SRC_DIR/migrate.js" && info "Migração concluída!" || warn "Migração falhou — verifique as credenciais do PostgreSQL"
 
 # --------------------------------------------------------------
-# 15. PM2 — registrar e salvar
+# PM2
 # --------------------------------------------------------------
 info "Registrando app no PM2"
 pm2 start "$INSTALL_DIR/ecosystem.config.js" --env production && \
@@ -1125,27 +757,33 @@ pm2 start "$INSTALL_DIR/ecosystem.config.js" --env production && \
   info "PM2: app registrado e salvo"
 
 # --------------------------------------------------------------
-# 16. Testar Nginx e recarregar
+# Nginx reload
 # --------------------------------------------------------------
 info "Testando e recarregando Nginx"
 nginx -t && systemctl reload nginx && info "Nginx recarregado com sucesso!" || warn "Falha no nginx — execute manualmente: sudo nginx -t && sudo systemctl reload nginx"
 
 # --------------------------------------------------------------
-# 17. Final
+# Final
 # --------------------------------------------------------------
 echo ""
 info "==========================================="
 info " Instalação concluída!"
 info "==========================================="
 echo ""
-echo "  API rodando em:  http://localhost:3002/api/ping"
-echo "  Proxy Nginx:     http://SEU_IP/api/ping"
+echo "  URL base:  https://api.projetosdinamicos.com.br/leilaocommodities/"
+echo "  Exemplos:"
+echo "    GET  /leilaocommodities/ping"
+echo "    GET  /leilaocommodities/leiloes"
+echo "    POST /leilaocommodities/auth/login"
 echo ""
-echo "  Admin padrão:    admin@leilaocommodities.com.br"
-echo "  Senha:           admin123"
+echo "  Interno:   localhost:3002/api/ (proxy Nginx)"
 echo ""
-echo "  PM2:             pm2 list"
-echo "  Logs:            pm2 logs leilaocommodities"
+echo "  CORS:     configure CORS_ORIGIN em $API_DIR/.env"
+echo "            com o domínio do seu frontend estático"
 echo ""
-echo "  .env:            $API_DIR/.env (ajuste DB_PASS e JWT_SECRET)"
+echo "  Admin padrão:"
+echo "    email: admin@leilaocommodities.com.br"
+echo "    senha: admin123"
+echo ""
+echo "  PM2:  pm2 list | pm2 logs leilaocommodities"
 echo ""
